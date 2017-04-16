@@ -20,15 +20,14 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{47364E18-FAA1-4F16-B790-F360CBFEED62}</ProjectGuid>
+    <ProjectGuid>{F6711669-F899-4EAC-B90B-D6D44A60B016}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>gen</RootNamespace>
+    <RootNamespace>exp_fwa_rosenbrock</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
-    <ProjectName>optim_lib</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
@@ -90,6 +89,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\mpfun\Documents\Visual Studio 2017\Projects\gen\gen;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -140,20 +140,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
+    <ClCompile Include="exp_fwa_rosenbrock.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="common.cpp" />
-    <ClCompile Include="fwa.cpp" />
-    <ClCompile Include="gen.cpp" />
-    <ClCompile Include="plant_propagation.cpp" />
-    <ClCompile Include="population.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="common.h" />
-    <ClInclude Include="fwa.h" />
-    <ClInclude Include="population.h" />
-    <ClInclude Include="plant_propagation.h" />
+    <ProjectReference Include="..\gen\gen.vcxproj">
+      <Project>{47364e18-faa1-4f16-b790-f360cbfeed62}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

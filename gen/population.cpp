@@ -1,4 +1,6 @@
 #include <sstream>
+#include <functional>
+#include <algorithm>
 #include "population.h"
 #include "common.h"
 
@@ -12,7 +14,7 @@ bool compareMemberWithValueLower(const MemberWithValue& v, const MemberWithValue
 bool compareMember(const Member & m1, const Member& m2)
 {
 	// http://stackoverflow.com/a/17341
-	double eps = std::numeric_limits<double>::epsilon();
+	double eps = numeric_limits<double>::epsilon();
 	for (size_t i = 0; i < m1.size(); ++i) {
 		if (::abs(m1[i] - m2[i]) >= eps) {
 			return false;
@@ -20,6 +22,22 @@ bool compareMember(const Member & m1, const Member& m2)
 	}
 	return true;
 }
+
+vector<MemberWithValue> evalObjectiveFunctionForPopulation(const Population &population, function<double(const Member&)> f)
+{
+	vector<MemberWithValue> objectiveValues;
+	objectiveValues.reserve(population.size());
+
+	transform(
+		population.begin(),
+		population.end(),
+		back_inserter(objectiveValues),
+		[f](auto &m) { return MemberWithValue(Member(m), f(m)); }
+	);
+
+	return objectiveValues;
+}
+
 
 Member createRandomInstance(const vector<CoordBound> &bounds)
 {
@@ -74,7 +92,14 @@ std::string printMember(const Member& m)
 	return ss.str();
 }
 
-std::string printMemberWithValue(const MemberWithValue& m)
+string printPopulation(const Population& population)
 {
-	return "";
+	stringstream ss;
+	int i = 0;
+	for (const auto &m : population) {
+		ss << i++ << "\t" << printMember(m);
+		ss << endl;
+	}
+
+	return ss.str();
 }

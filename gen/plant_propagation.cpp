@@ -11,20 +11,6 @@ double normalizeTan(double f) {
 	return 0.5 * (tanh(4.0 * f - 2.0) + 1.0);
 }
 
-vector<MemberWithValue> evalObjectiveFunctionForPopulation(const Population &population, function<double(const Member&)> f)
-{
-	vector<MemberWithValue> objectiveValues;
-	objectiveValues.reserve(population.size());
-
-	transform(
-		population.begin(),
-		population.end(),
-		back_inserter(objectiveValues),
-		[f](auto &m) { return MemberWithValue(Member(m), f(m)); }
-	);
-
-	return objectiveValues;
-}
 
 vector<MemberWithValue> calculateFitnessForPopulation(
 	const Population& population,
@@ -93,6 +79,7 @@ vector<Member> computeNewRunners(double nMax, const MemberWithValue &m, const ve
 			double bj = get<1>(boundj);
 
 			// update solution
+			// TO-DO: Validate mapping back to solution space. I think this here is a bit crude
 			double newX = xj + (bj - aj) * drj;
 			if (newX < aj) {
 				newX = aj;

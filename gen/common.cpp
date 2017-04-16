@@ -17,3 +17,4 @@ double fRand(double fMin, double fMax)
 	auto f = randomDouble() / RAND_MAX;
 	return fMin + f * (fMax - fMin);
 }
+

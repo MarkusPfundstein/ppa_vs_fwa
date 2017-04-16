@@ -5,7 +5,9 @@
 #include <tuple>
 #include <vector>
 #include <string>
-// Common types
+#include <functional>
+
+using namespace std;
 
 // Bounds for each dimension (in paper called a, b)
 typedef std::tuple<double, double> CoordBound;
@@ -20,10 +22,12 @@ typedef std::tuple<Member, double> MemberWithValue;
 bool compareMemberWithValueLower(const MemberWithValue& v, const MemberWithValue& v2);
 bool compareMember(const Member & m1, const Member& m2);
 
+vector<MemberWithValue> evalObjectiveFunctionForPopulation(const Population &population, function<double(const Member&)> f);
+
 Population createRandomPopulation(size_t np, const std::vector<CoordBound> &bounds);
 
 std::string printBounds(const std::vector<CoordBound> &bounds);
 std::string printMember(const Member& m);
-std::string printMemberWithValue(const MemberWithValue& m);
+std::string printPopulation(const Population& population);
 
 #endif
