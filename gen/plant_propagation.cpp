@@ -12,12 +12,14 @@ double normalizeTan(double f) {
 }
 
 
+// O(2n)
 vector<MemberWithValue> calculateFitnessForPopulation(
 	const Population& population,
 	function<double(const Member&)> objF,
 	function<double(double, double, double)> f,
 	function<double(double)> normF)
 {
+	// O(n)
 	auto objectiveValues = evalObjectiveFunctionForPopulation(population, objF);
 	//for (auto f : objectiveValues) cout << get<1>(f) << endl;
 
@@ -29,6 +31,7 @@ vector<MemberWithValue> calculateFitnessForPopulation(
 	vector<MemberWithValue> fitnesses;
 	fitnesses.reserve(objectiveValues.size());
 
+	// O(n)
 	for (const auto &m : objectiveValues) {
 		double fval = min == max ? 0.5 : f(get<1>(m), min, max);
 		auto member = get<0>(m);
@@ -36,21 +39,6 @@ vector<MemberWithValue> calculateFitnessForPopulation(
 	}
 
 	return fitnesses;
-}
-
-vector<double> normalizeFitness(const vector<double> &fitnesses, function<double(double)> f)
-{
-	vector<double> normalizedFitnesses;
-	normalizedFitnesses.reserve(fitnesses.size());
-
-	transform(
-		fitnesses.begin(),
-		fitnesses.end(),
-		back_inserter(normalizedFitnesses),
-		f
-	);
-
-	return normalizedFitnesses;
 }
 
 vector<Member> computeNewRunners(double nMax, const MemberWithValue &m, const vector<CoordBound> &bounds)

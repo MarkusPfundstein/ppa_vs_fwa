@@ -25,7 +25,19 @@ int main()
 {
 	vector<CoordBound> coordinateBounds{
 		CoordBound(-5.0, 10.0),
-		CoordBound(-5.0, 10.0)
+		CoordBound(-5.0, 10.0)/*,
+		CoordBound(-5.0, 10.0),
+		CoordBound(-5.0, 10.0),
+		CoordBound(-5.0, 10.0),
+		CoordBound(-5.0, 10.0),
+		CoordBound(-5.0, 10.0),
+		CoordBound(-5.0, 10.0),
+		CoordBound(-5.0, 10.0),
+		CoordBound(-5.0, 10.0),
+		CoordBound(-5.0, 10.0),
+		CoordBound(-5.0, 10.0),
+		CoordBound(-5.0, 10.0),
+		CoordBound(-5.0, 10.0)*/
 	};
 
 	// Generate a population P = {p_i, i = 1, ...., m}

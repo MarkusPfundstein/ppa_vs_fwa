@@ -4,6 +4,7 @@
 
 #include "fwa.h"
 #include "population.h"
+#include "common.h"
 
 // fwa consists of:
 // - explosion operator
@@ -33,14 +34,66 @@
 // 4. Calculate the best fitness value. If the terminal condition is met, stop the algorithm. Otherwise, continue with the iteration process. The
 //    best sparks and the selected sparks form a new population.
 
+Member generateNewSpark(const Member& xi, const double A, const vector<CoordBound> &bounds)
+{
+	// alg. 1
+	// initialize the location of the spark (xj = xi)
+	Member xj(xi);
 
+	// select how many dimensions have been effected
+	const size_t z = static_cast<size_t>(round(xj.size() * fRand(0, 1)));
+	cout << "\t\t\tz: " << z << endl;
+	
+	// select randomly z dimensions -> generate array of indices.. shuffle them
+	vector<int> dimIndices;
+	for (size_t i = 0; i < xj.size(); ++i) {
+		dimIndices.push_back(i);
+	}
+	random_shuffle(dimIndices.begin(), dimIndices.end());
+
+	// calculate the displacement h = A_i * rand(0, 1)
+	const double h = A * fRand(-1, 1);
+	cout << "\t\t\th: " << h << endl;
+
+	// for each dimension x^j_k \in { pre-selected z dimensions of xj } do:
+	for (size_t i = 0; i < z; ++i) {
+		const size_t k = dimIndices[i];
+		double &xjk = xj[k];
+
+		xjk += h;
+
+		// out of bounds? get bound for dimension and check
+		const auto& bound = bounds[k];
+		const double xmink = get<0>(bound);
+		const double xmaxk = get<1>(bound);
+
+		if (xjk < xmink || xjk > xmaxk) {
+			// bounds should actually be ints I guess
+			xjk = xmink + static_cast<int>(abs(xjk)) % static_cast<int>((xmaxk - xmink));
+		}
+	}
+
+	return xj;
+}
+
+Population generateNewSparksFromExplosion(const Member& parentSpark, const size_t s, const double A, const vector<CoordBound> &bounds)
+{
+	Population newSparks;
+
+	for (size_t i = 0; i < s; ++i) {
+		newSparks.push_back(generateNewSpark(parentSpark, A, bounds));
+	}
+
+	return newSparks;
+}
 
 const int calculateNewSparks(
 	const vector<MemberWithValue> &objectiveValues, 
 	const size_t m, 
 	const double a, 
 	const double b,
-	const double Amax
+	const double Amax,
+	const vector<CoordBound> &bounds
 )
 {
 	const auto minMax = minmax_element(objectiveValues.begin(), objectiveValues.end(), compareMemberWithValueLower);
@@ -65,8 +118,9 @@ const int calculateNewSparks(
 	cout << "bm: " << bm << endl;
 	for (const auto &it : objectiveValues) {
 		// Eq. 2, calculate relative fitness
-		const double current = get<1>(it);
-		const double s = m * (((ymax - current) + eps) / (total_yMaxMinusF + eps));
+		const double fval = get<1>(it);
+		const auto& member = get<0>(it);
+		const double s = m * (((ymax - fval) + eps) / (total_yMaxMinusF + eps));
 
 		// Eq. 3, ensure upper and lower bounds of sparks
 		double sr; 
@@ -83,14 +137,22 @@ const int calculateNewSparks(
 		}
 
 		// Eq. 4 amplitude
-		const double A = Amax * (((current - ymin) + eps) / (total_fMinus_yMin + eps));
+		const double A = Amax * (((fval - ymin) + eps) / (total_fMinus_yMin + eps));
+
+		// paper is not really clear what happens now but logic says we have to generate s sparks now and
+		// displace them:
 
 		cout << "--------------" << endl;
 		cout << "member: " << printMember(get<0>(it)) << endl;
-		cout << "\tfval: " << current << endl;
+		cout << "\tfval: " << fval << endl;
 		cout << "\t\ts: " << s << endl;
 		cout << "\t\tsr: " << sr << endl;
 		cout << "\t\tA: " << A << endl;
+
+		auto newSparks = generateNewSparksFromExplosion(member, static_cast<size_t>(sr), A, bounds);
+
+		cout << "newSparks: " << endl << printPopulation(newSparks);
+		cout << endl << endl;
 	}
 
 	return 0;
@@ -107,7 +169,7 @@ Population fwa(
 	auto P = createRandomPopulation(n, coordinateBounds);
 
 	// temporary set one member to opt
-	P[0] = Member({ 1, 1 });
+	//P[0] = Member({ 1, 1 });
 
 	// n = 5, m = 50, a = 0.04, b = 0.8, Amax = 50, mMuts = 5
 	// n = initial number of fireworks
@@ -128,7 +190,7 @@ Population fwa(
 
 		auto objectiveValues = evalObjectiveFunctionForPopulation(P, objectiveFunction);
 
-		calculateNewSparks(objectiveValues, m, a, b, Amax);
+		calculateNewSparks(objectiveValues, m, a, b, Amax, coordinateBounds);
 
 	}
 
