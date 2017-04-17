@@ -20,7 +20,8 @@ typedef std::vector<Member> Population;
 typedef std::tuple<Member, double> MemberWithValue;
 
 bool compareMemberWithValueLower(const MemberWithValue& v, const MemberWithValue& v2);
-bool compareMember(const Member & m1, const Member& m2);
+bool compareMemberWithValueSameValue(const MemberWithValue& v, const MemberWithValue& v2);
+bool compareMemberEquals(const Member & m1, const Member& m2);
 
 vector<MemberWithValue> evalObjectiveFunctionForPopulation(const Population &population, function<double(const Member&)> f);
 

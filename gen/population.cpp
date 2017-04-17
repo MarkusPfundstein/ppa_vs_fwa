@@ -11,7 +11,20 @@ bool compareMemberWithValueLower(const MemberWithValue& v, const MemberWithValue
 	return get<1>(v) < get<1>(v2);
 }
 
-bool compareMember(const Member & m1, const Member& m2)
+bool compareMemberWithValueSameValue(const MemberWithValue& v1, const MemberWithValue& v2)
+{
+	// http://stackoverflow.com/a/17341
+	double eps = numeric_limits<double>::epsilon();
+	double d1 = get<1>(v1);
+	double d2 = get<1>(v2);
+
+	if (::abs(d1 - d2) >= eps) {
+		return false;
+	}
+	return true;
+}
+
+bool compareMemberEquals(const Member & m1, const Member& m2)
 {
 	// http://stackoverflow.com/a/17341
 	double eps = numeric_limits<double>::epsilon();

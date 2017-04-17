@@ -41,10 +41,10 @@ int main()
 	};
 
 	// Generate a population P = {p_i, i = 1, ...., m}
-	const size_t n = 10;
+	const size_t n = 30;
 
 	// iteration g and max number of iterations
-	const size_t gMax = 1;
+	const size_t gMax = 30;
 
 	const size_t nRuns = 10;
 
