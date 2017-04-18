@@ -10,14 +10,23 @@ map<string, function<Population(Parameters*)>> ALGO_MAP = {
 	{ "fwa", runFWA }
 };
 
+map <string, function<double(const Member&)>> OBJ_MAP = {
+	{ "rosenbrock2d", rosenbrock2d },
+	{ "schwefel2d", schwefel2d }
+};
 
-Population run(Parameters *params)
+
+Population run(Parameters *ps)
 {
-	return ALGO_MAP.at(params->algorithm)(params);
+	return ALGO_MAP.at(ps->algorithm)(ps);
 }
 
 int runExperiments(size_t nRuns, Parameters *ps)
 {
+	if (ps->objectiveFunctionName.size() > 0) {
+		ps->objectiveFunction = OBJ_MAP.at(ps->objectiveFunctionName);
+	}
+
 	vector<MemberWithValue> results;
 	results.reserve(nRuns);
 

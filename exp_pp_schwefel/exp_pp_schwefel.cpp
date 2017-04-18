@@ -21,7 +21,6 @@ int main()
 	ppa.initialSize = 30;
 	ppa.maxGenerations = 30;
 	ppa.nMax = 10;
-	ppa.objectiveFunction = schwefel2d;
 	ppa.objectiveFunctionName = "schwefel2d";
 	ppa.knownOptimum = &knownOptimumMember;
 

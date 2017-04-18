@@ -16,8 +16,7 @@ int main()
 	params.coordinateBounds = coordinateBounds;
 	params.initialSize = 30;
 	params.maxGenerations = 30;
-	params.objectiveFunction = rosenbrock2d;
-	params.objectiveFunctionName = "rosenbrock";
+	params.objectiveFunctionName = "rosenbrock2d";
 	params.knownOptimum = &knownOptimum;
 
 	return runExperiments(10, &params);
