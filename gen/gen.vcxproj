@@ -143,17 +143,20 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="common.cpp" />
+    <ClCompile Include="framework.cpp" />
+    <ClCompile Include="functions.cpp" />
+    <ClCompile Include="rng.cpp" />
     <ClCompile Include="fwa.cpp" />
-    <ClCompile Include="gen.cpp" />
-    <ClCompile Include="plant_propagation.cpp" />
+    <ClCompile Include="ppa.cpp" />
     <ClCompile Include="population.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="common.h" />
+    <ClInclude Include="framework.h" />
+    <ClInclude Include="functions.h" />
+    <ClInclude Include="rng.h" />
     <ClInclude Include="fwa.h" />
     <ClInclude Include="population.h" />
-    <ClInclude Include="plant_propagation.h" />
+    <ClInclude Include="ppa.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

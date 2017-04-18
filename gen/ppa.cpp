@@ -2,8 +2,8 @@
 #include <algorithm>
 #include <functional>
 #include <iostream>
-#include "common.h"
-#include "plant_propagation.h"
+#include "rng.h"
+#include "ppa.h"
 
 using namespace std;
 
@@ -84,23 +84,18 @@ vector<Member> computeNewRunners(double nMax, const MemberWithValue &m, const ve
 	return newRunners;
 }
 
-Population runPlantPropagation1(
-	const vector<CoordBound> coordinateBounds,
-	const size_t m,
-	const size_t gMax,
-	const size_t nMax,
-	function<double(double, double, double)> fitnessFunction,
-	function<double(const Member&)> objectiveFunction
-)
+Population runPPA(Parameters *ps)
 {
-	auto P = createRandomPopulation(m, coordinateBounds);
+	const PPA &params = castParameters<PPA>(ps);
 
-	for (size_t g = 0; g < gMax; ++g) {
+	auto P = createRandomPopulation(params.initialSize, params.coordinateBounds);
+
+	for (size_t g = 0; g < params.maxGenerations; ++g) {
 		// compute N_i = f(p_i) forall p in P
 		auto N = calculateFitnessForPopulation(
 			P,
-			objectiveFunction,
-			fitnessFunction,
+			params.objectiveFunction,
+			params.fitnessFunction,
 			normalizeTan
 		);
 
@@ -117,11 +112,11 @@ Population runPlantPropagation1(
 		Population phi;
 
 		// if we are *not* in the last iteration, we create new runners
-		if (g < gMax - 1) {
-			for (size_t i = 0; i < m; ++i) {
+		if (g < params.maxGenerations - 1) {
+			for (size_t i = 0; i < params.initialSize; ++i) {
 				// r_i <- set of runners where both the size of the set and the distance for each
 				//        runner (individually) is proportional to the fitness N_i
-				auto R = computeNewRunners(nMax, N[i], coordinateBounds);
+				auto R = computeNewRunners(params.nMax, N[i], params.coordinateBounds);
 
 				// phi = phi UNION r
 				// Note: we don't do union here. (see erase below)

@@ -9,15 +9,17 @@
 
 using namespace std;
 
+typedef double COORDBOUND_TYPE;
+
 // Bounds for each dimension (in paper called a, b)
-typedef std::tuple<double, double> CoordBound;
+typedef tuple<COORDBOUND_TYPE, COORDBOUND_TYPE> CoordBound;
 
 // Member of population -> Coordinate
-typedef std::vector<double> Member;
-typedef std::vector<Member> Population;
+typedef vector<double> Member;
+typedef vector<Member> Population;
 
 // tuple that combines a Coordinate with a double -> e.g. fitness value
-typedef std::tuple<Member, double> MemberWithValue;
+typedef tuple<Member, double> MemberWithValue;
 
 bool compareMemberWithValueLower(const MemberWithValue& v, const MemberWithValue& v2);
 bool compareMemberWithValueSameValue(const MemberWithValue& v, const MemberWithValue& v2);
@@ -25,10 +27,12 @@ bool compareMemberEquals(const Member & m1, const Member& m2);
 
 vector<MemberWithValue> evalObjectiveFunctionForPopulation(const Population &population, function<double(const Member&)> f);
 
-Population createRandomPopulation(size_t np, const std::vector<CoordBound> &bounds);
+Population createRandomPopulation(size_t np, const vector<CoordBound> &bounds);
 
-std::string printBounds(const std::vector<CoordBound> &bounds);
-std::string printMember(const Member& m);
-std::string printPopulation(const Population& population);
+vector<CoordBound> createUniformCoordinateBounds(size_t n, COORDBOUND_TYPE min, COORDBOUND_TYPE max);
+
+string printBounds(const vector<CoordBound> &bounds);
+string printMember(const Member& m);
+string printPopulation(const Population& population);
 
 #endif

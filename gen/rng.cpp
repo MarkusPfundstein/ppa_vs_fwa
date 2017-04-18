@@ -3,7 +3,7 @@
 #include <random>
 #include <algorithm>
 
-#include "common.h"
+#include "rng.h"
 
 using namespace std;
 

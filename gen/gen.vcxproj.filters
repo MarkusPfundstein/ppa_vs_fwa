@@ -18,33 +18,42 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="common.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="plant_propagation.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="population.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="gen.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="fwa.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ppa.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rng.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="framework.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="functions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="common.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="plant_propagation.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="population.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="fwa.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ppa.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rng.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="framework.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="functions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

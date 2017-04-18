@@ -4,7 +4,7 @@
 
 #include "fwa.h"
 #include "population.h"
-#include "common.h"
+#include "rng.h"
 
 // fwa consists of:
 // - explosion operator
@@ -269,45 +269,16 @@ Population selectSparksForNextGeneration(const Population& K, const Member& best
 	return newPopulation;
 }
 
-Population fwa(
-	const vector<CoordBound> coordinateBounds,
-	const size_t n,
-	const size_t gMax,
-	function<double(double, double, double)> fitnessFunction,
-	function<double(const Member&)> objectiveFunction
-)
+Population runFWA(Parameters *ps)
 {
-	auto P = createRandomPopulation(n, coordinateBounds);
+	const FWA& fwa = castParameters<FWA>(ps);
 
-	// temporary set one member to opt
-	//P[0] = Member({ 1, 1 });
+	auto P = createRandomPopulation(fwa.initialSize, fwa.coordinateBounds);
 
-	// n = 5, m = 50, a = 0.04, b = 0.8, Amax = 50, mMuts = 5
-	// n = initial number of fireworks
-	// m = total number of sparks         (like nMax in PPA?)
-	// Amax = maximum explosion amplitude
-	// mMuts = number of mutation sparks
-	// a, b = some constants
-	
-	const double Amax = 40.0;
-	const size_t m = 50;       
-	const size_t mMuts = 5;
-	const double a = 0.04;
-	const double b = 0.8;
-	const function<double(const Member&, const Member&)> distanceFunction = [](const auto& m1, const auto& m2) {
-		// euclidean length
-		double sum = 0.0;
-		for (size_t i = 0; i < m1.size(); ++i) {
-			sum += pow(m1[i] - m2[i], 2);
-		}
-
-		return sqrt(sum);
-	};
-
-	for (size_t g = 0; g < gMax; ++g) {
+	for (size_t g = 0; g < fwa.maxGenerations; ++g) {
 		// set of n fireworks at n locations
-		auto objectiveValues = evalObjectiveFunctionForPopulation(P, objectiveFunction);
-		if (g == gMax - 1) {
+		auto objectiveValues = evalObjectiveFunctionForPopulation(P, fwa.objectiveFunction);
+		if (g == fwa.maxGenerations - 1) {
 			stable_sort(objectiveValues.begin(), objectiveValues.end(), compareMemberWithValueLower);
 			//reverse(objectiveValues.begin(), objectiveValues.end());
 
@@ -321,12 +292,12 @@ Population fwa(
 			// for each firework x_i do:
 			//     calculate number of sparks s_i that firework x_i yields (Eq. 3)
 			//     obtain locations of s_i sparks of firework x_i (Alg. 1)
-			auto newSparks = calculateNewSparks(objectiveValues, m, a, b, Amax, coordinateBounds);
+			auto newSparks = calculateNewSparks(objectiveValues, fwa.maxSparks, fwa.a, fwa.b, fwa.Amax, fwa.coordinateBounds);
 
 			// for k = 1:mMuts do:
 			//		randomly select a firework x_i
 			//      generate a specific gaussian spark for the firework (Alg. 2)
-			auto gaussianSparks = generateGaussianSparks(P, mMuts, coordinateBounds);
+			auto gaussianSparks = generateGaussianSparks(P, fwa.gaussianMutations, fwa.coordinateBounds);
 
 			// select the best location and keep it for next explosion generation
 			auto bestLocation = get<0>(*min_element(objectiveValues.begin(), objectiveValues.end(), compareMemberWithValueLower));
@@ -354,7 +325,7 @@ Population fwa(
 				}
 			}
 
-			P = selectSparksForNextGeneration(setSparks, bestLocation, n, distanceFunction);
+			P = selectSparksForNextGeneration(setSparks, bestLocation, fwa.initialSize, fwa.distanceFunction);
 			P.push_back(bestLocation);
 		}
 	}

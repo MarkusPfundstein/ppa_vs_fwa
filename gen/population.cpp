@@ -2,10 +2,7 @@
 #include <functional>
 #include <algorithm>
 #include "population.h"
-#include "common.h"
-
-using namespace std;
-
+#include "rng.h"
 
 bool compareMemberWithValueLower(const MemberWithValue& v, const MemberWithValue& v2) {
 	return get<1>(v) < get<1>(v2);
@@ -18,7 +15,7 @@ bool compareMemberWithValueSameValue(const MemberWithValue& v1, const MemberWith
 	double d1 = get<1>(v1);
 	double d2 = get<1>(v2);
 
-	if (::abs(d1 - d2) >= eps) {
+	if (abs(d1 - d2) >= eps) {
 		return false;
 	}
 	return true;
@@ -29,7 +26,7 @@ bool compareMemberEquals(const Member & m1, const Member& m2)
 	// http://stackoverflow.com/a/17341
 	double eps = numeric_limits<double>::epsilon();
 	for (size_t i = 0; i < m1.size(); ++i) {
-		if (::abs(m1[i] - m2[i]) >= eps) {
+		if (abs(m1[i] - m2[i]) >= eps) {
 			return false;
 		}
 	}
@@ -76,6 +73,18 @@ Population createRandomPopulation(size_t np, const vector<CoordBound> &bounds) {
 	}
 
 	return pop;
+}
+
+vector<CoordBound> createUniformCoordinateBounds(size_t n, COORDBOUND_TYPE min, COORDBOUND_TYPE max)
+{
+	vector<CoordBound> bounds;
+	bounds.reserve(n);
+
+	for (size_t i = 0; i < n; ++i) {
+		bounds.push_back(CoordBound(min, max));
+	}
+
+	return bounds;
 }
 
 std::string printBounds(const std::vector<CoordBound> &bounds)
