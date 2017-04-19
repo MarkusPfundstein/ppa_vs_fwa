@@ -5,6 +5,7 @@
 /* objective function */
 double rosenbrock2d(const Member& member);
 double schwefel2d(const Member& member);
+double griewank(const Member& member);
 
 /* fitness normalizers */
 double minMaxFitness(double v, double min, double max);

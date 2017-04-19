@@ -28,20 +28,19 @@ struct Parameters {
 	// optional: Member of population that is known to be optimum. 
 	// if set we can control to stop when we are in certain area of optimum.
 	Member *knownOptimum = nullptr;
+
+	Parameters(string alg) : algorithm(alg) {}
 };
 
 /* algorithm specific */
 struct PPA : public Parameters {
 	// maximum number of runners per plant
-	size_t nMax;
+	size_t nMax = 5;
 
 	// function to normalize objective function value into range (0, 1). Defaults to minMaxFitness
-	function<double(double, double, double)> fitnessFunction;
+	function<double(double, double, double)> fitnessFunction = minMaxFitness;
 
-	PPA() : Parameters() {
-		algorithm = "ppa";
-		fitnessFunction = minMaxFitness;
-	}
+	PPA() : Parameters("ppa") {}
 };
 
 struct FWA : public Parameters {
@@ -58,15 +57,10 @@ struct FWA : public Parameters {
 	size_t gaussianMutations = 5;
 
 	// distance function to calculate distance between Members. Defaults to euclideanDistance
-	function<double(const Member&, const Member&)> distanceFunction;
+	function<double(const Member&, const Member&)> distanceFunction = euclideanDistance;
 
-	FWA() : Parameters() {
-		algorithm = "fwa";
-		distanceFunction = euclideanDistance;
-	}
+	FWA() : Parameters("fwa") {}
 };
-
-Population run(Parameters *params);
 
 int runExperiments(size_t n, Parameters *ps);
 

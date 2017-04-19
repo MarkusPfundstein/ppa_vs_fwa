@@ -12,9 +12,9 @@ map<string, function<Population(Parameters*)>> ALGO_MAP = {
 
 map <string, function<double(const Member&)>> OBJ_MAP = {
 	{ "rosenbrock2d", rosenbrock2d },
-	{ "schwefel2d", schwefel2d }
+	{ "schwefel2d", schwefel2d },
+	{ "griewank", griewank }
 };
-
 
 Population run(Parameters *ps)
 {
@@ -27,9 +27,6 @@ int runExperiments(size_t nRuns, Parameters *ps)
 		ps->objectiveFunction = OBJ_MAP.at(ps->objectiveFunctionName);
 	}
 
-	vector<MemberWithValue> results;
-	results.reserve(nRuns);
-
 	cout << "run " << ps->algorithm << endl;
 	cout << "\t" << "objectiveFunction:\t" << ps->objectiveFunctionName << endl;
 	cout << "\t" << "initialSize:\t\t " << ps->initialSize << endl;
@@ -39,9 +36,9 @@ int runExperiments(size_t nRuns, Parameters *ps)
 		cout << "\t" << "knownOptimum:\t\t " << printMember(*ps->knownOptimum) << endl;
 		cout << "\t" << "globalMinimum:\t\t " << ps->objectiveFunction(*ps->knownOptimum) << endl;
 	}
-	//cout << "\t" << "bounds:\t\t " << printBounds(coordinateBounds) << endl;
-	//cout << "\t" << "knownOptimum:\t " << printMember(knownOptimumMember) << endl;
-	//cout << "\t" << "globalMinimum:\t " << knownOptimum << endl;
+
+	vector<MemberWithValue> results;
+	results.reserve(nRuns);
 
 	for (size_t i = 0; i < nRuns; ++i) {
 

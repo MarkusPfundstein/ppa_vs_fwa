@@ -11,6 +11,24 @@ double rosenbrock2d(const Member& member)
 	return pow((a - x), 2) + b * pow((y - pow(x, 2)), 2);
 };
 
+double griewank(const Member& member) {
+	// 1/4000 * SUM_i(x_i^2) - PROD_i(cos(x/sqrt(i)) + 1
+
+	double sum = 0.0;
+	for (double xi : member) {
+		sum += ( pow(xi, 2) / 4000.0 );
+	}
+	double prod = 1.0;
+
+	int i = 1;
+	for (double xi : member) {
+		prod *= cos(xi / sqrt(i));
+		++i;
+	}
+
+	return sum - prod + 1.0;
+}
+
 // http://www.sfu.ca/~ssurjano/schwef.html
 double schwefel2d(const Member& member) {
 	double d = member.size();
