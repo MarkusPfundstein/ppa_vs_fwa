@@ -87,12 +87,19 @@ vector<CoordBound> createUniformCoordinateBounds(size_t n, COORDBOUND_TYPE min, 
 	return bounds;
 }
 
-std::string printBounds(const std::vector<CoordBound> &bounds)
+string printBound(const CoordBound& b)
+{
+	stringstream ss;
+	ss << "(" << get<0>(b) << ", " << get<1>(b) << ")";
+	return ss.str();
+}
+
+string printBounds(const vector<CoordBound> &bounds)
 {
 	stringstream ss;
 	for (size_t i = 0; i < bounds.size(); ++i) {
 		const auto &b = bounds[i];
-		ss << "(" << get<0>(b) << ", " << get<1>(b) << ")";
+		ss << printBound(b);
 		if (i < bounds.size() - 1) {
 			ss << ", ";
 		}
@@ -100,7 +107,7 @@ std::string printBounds(const std::vector<CoordBound> &bounds)
 	return ss.str();
 }
 
-std::string printMember(const Member& m)
+string printMember(const Member& m)
 {
 	stringstream ss;
 	ss << "(";

@@ -31,6 +31,7 @@ Population createRandomPopulation(size_t np, const vector<CoordBound> &bounds);
 
 vector<CoordBound> createUniformCoordinateBounds(size_t n, COORDBOUND_TYPE min, COORDBOUND_TYPE max);
 
+string printBound(const CoordBound& bound);
 string printBounds(const vector<CoordBound> &bounds);
 string printMember(const Member& m);
 string printPopulation(const Population& population);

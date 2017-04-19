@@ -1,42 +1,93 @@
 #include "functions.h"
 
-// https://en.wikipedia.org/wiki/Rosenbrock_function
-double rosenbrock2d(const Member& member)
-{
-	double a = 1;
-	double b = 100.0;
+const double PI = 3.141592653589793238462643383279502884;
 
-	double x = member[0];
-	double y = member[1];
-	return pow((a - x), 2) + b * pow((y - pow(x, 2)), 2);
-};
+template <typename RT, typename VT>
+RT foldLeft(const vector<VT> &xs, VT s, function<RT(RT, VT)> f)
+{
+	RT sx = s;
+	for (const auto& x : xs) {
+		sx = f(sx, x);
+	}
+	return sx;
+}
+
+template <typename T>
+T sum(const vector<T> &xs, function<T(T)> f)
+{
+	return foldLeft<T, T>(xs, 0, [&](auto acc, auto x) { return acc + f(x); });
+}
+
+template <typename T>
+T prod(const vector<T> &xs, function<T(T)> f)
+{
+	return foldLeft<T, T>(xs, 1, [&](auto acc, auto x) { return acc * f(x); });
+}
+
+double rosenbrock(const Member& member) {
+	double sum = 0.0;
+	
+	const size_t n = member.size();
+	for (size_t i = 0; i < (n - 1); ++i) {
+		double inner1 = member[i + 1] - pow(member[i], 2);
+		double part1 = 100.0 * pow(inner1, 2);
+		double part2 = pow(member[i] - 1.0, 2);
+
+		sum += (part1 + part2);
+	}
+
+	return sum;
+}
 
 double griewank(const Member& member) {
 	// 1/4000 * SUM_i(x_i^2) - PROD_i(cos(x/sqrt(i)) + 1
 
-	double sum = 0.0;
-	for (double xi : member) {
-		sum += ( pow(xi, 2) / 4000.0 );
-	}
-	double prod = 1.0;
+	const double S = sum<double>(member, [](auto x) { return (pow(x, 2) / 4000.0); });
 
 	int i = 1;
+	double prod = 1.0;
 	for (double xi : member) {
 		prod *= cos(xi / sqrt(i));
 		++i;
 	}
 
-	return sum - prod + 1.0;
+	return S - prod + 1.0;
 }
 
-// http://www.sfu.ca/~ssurjano/schwef.html
-double schwefel2d(const Member& member) {
-	double d = member.size();
+double schwefel(const Member& member)
+{
+	const double c = 418.98288727243369;
 
-	double x = member[0];
-	double y = member[1];
-	return 418.9829 * d - ((x * sin(sqrt(abs(x)))) + (y * sin(sqrt(abs(y)))));
-};
+	const double s = sum<double>(member, [](auto x) { return x * sin(sqrt(abs(x)));  });
+
+	return c * member.size() - s;
+}
+
+double easom(const Member& member)
+{
+	const double x1 = member[0];
+	const double x2 = member[1];
+
+	return -cos(x1) * cos(x2) * exp(-(pow(x1 - PI, 2) + pow(x2 - PI, 2)));
+}
+
+double ackleys_path(const Member& member)
+{
+	const double a = 20;
+	const double b = 0.2;
+	const double c = 2 * PI;
+	const double n = member.size();
+
+	const double s1 = sum<double>(member, [](auto x) { return pow(x, 2); });
+	const double s2 = sum<double>(member, [c](auto x) { return cos(c * x); });
+
+	const double e1 = exp(-b * sqrt(s1 / n));
+	const double e2 = exp(s2 / n);
+	
+	return -a * e1 - e2 + a + exp(1);
+}
+
+/* others */
 
 double minMaxFitness(double v, double min, double max)
 {

@@ -112,9 +112,12 @@ bool getParameters(option::Option *options, Parameters **p)
 		// brat , what a shitty code
 		
 		auto tokens = split(knownOptimumString, ',');
-		if (tokens.size() != dimensions) {
+		if (tokens.size() < static_cast<size_t>(dimensions)) {
 			cerr << "knownOptimum dimensionality must be equal to dimensions" << endl;
 			goto errorAndDeleteP;
+		}
+		if (tokens.size() > static_cast<size_t>(dimensions)) {
+			cout << "WARNING: knownOptimum.dim > dimensionality" << endl;
 		}
 
 		auto *member = new Member();
