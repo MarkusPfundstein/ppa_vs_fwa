@@ -3,8 +3,14 @@
 #include <string>
 #include <map>
 #include <functional>
+#include <string>
+#include <sstream>
 #include "population.h"
 #include "functions.h"
+
+struct ValueCollector {
+	vector<Member> bestMembersInGeneration;
+};
 
 struct Parameters {
 	// set bounds (min, max) for coordinate system. determines dimension of problem.
@@ -29,6 +35,8 @@ struct Parameters {
 	// if set we can control to stop when we are in certain area of optimum.
 	Member *knownOptimum = nullptr;
 
+	virtual string printParameters() = 0;
+
 	Parameters(string alg) : algorithm(alg) {}
 };
 
@@ -39,6 +47,13 @@ struct PPA : public Parameters {
 
 	// function to normalize objective function value into range (0, 1). Defaults to minMaxFitness
 	function<double(double, double, double)> fitnessFunction = minMaxFitness;
+
+	string printParameters()
+	{
+		stringstream ss;
+		ss << "nMax:\t\t\t " << nMax;
+		return ss.str();
+	}
 
 	PPA() : Parameters("ppa") {}
 };
@@ -59,10 +74,21 @@ struct FWA : public Parameters {
 	// distance function to calculate distance between Members. Defaults to euclideanDistance
 	function<double(const Member&, const Member&)> distanceFunction = euclideanDistance;
 
+	string printParameters()
+	{
+		stringstream ss;
+		ss << "Amax:\t\t\t " << Amax << endl;
+		ss << "maxSparks:\t\t " << maxSparks << endl;
+		ss << "a:\t\t\t " << a << endl;
+		ss << "b:\t\t\t " << b << endl;
+		ss << "gaussianM:\t\t " << gaussianMutations << endl;
+		return ss.str();
+	}
+
 	FWA() : Parameters("fwa") {}
 };
 
-int runExperiments(size_t n, Parameters *ps);
+int runExperiments(size_t n, Parameters *ps, string writeValuesPath = "");
 
 template <typename T> 
 const T& castParameters(Parameters *ps)

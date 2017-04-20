@@ -3,6 +3,6 @@
 
 #include "framework.h"
 
-Population runFWA(Parameters *ps);
+Population runFWA(Parameters *ps, ValueCollector &v);
 
 #endif

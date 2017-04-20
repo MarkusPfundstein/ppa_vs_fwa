@@ -90,7 +90,7 @@ vector<CoordBound> createUniformCoordinateBounds(size_t n, COORDBOUND_TYPE min, 
 string printBound(const CoordBound& b)
 {
 	stringstream ss;
-	ss << "(" << get<0>(b) << ", " << get<1>(b) << ")";
+	ss << get<0>(b) << ", " << get<1>(b);
 	return ss.str();
 }
 
@@ -110,14 +110,14 @@ string printBounds(const vector<CoordBound> &bounds)
 string printMember(const Member& m)
 {
 	stringstream ss;
-	ss << "(";
+	//ss << "(";
 	for (size_t i = 0; i < m.size(); ++i) {
 		ss << m[i];
 		if (i < m.size() - 1) {
 			ss << ",";
 		}
 	}
-	ss << ")";
+	//ss << ")";
 	return ss.str();
 }
 

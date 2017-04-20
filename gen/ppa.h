@@ -3,6 +3,6 @@
 
 #include "framework.h"
 
-Population runPPA(Parameters *params);
+Population runPPA(Parameters *params, ValueCollector &vc);
 
 #endif

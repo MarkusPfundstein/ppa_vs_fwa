@@ -84,7 +84,7 @@ vector<Member> computeNewRunners(double nMax, const MemberWithValue &m, const ve
 	return newRunners;
 }
 
-Population runPPA(Parameters *ps)
+Population runPPA(Parameters *ps, ValueCollector &vc)
 {
 	const PPA &params = castParameters<PPA>(ps);
 
@@ -128,8 +128,10 @@ Population runPPA(Parameters *ps)
 			}
 
 			// P <- phi
-			P.erase(P.begin(), P.end());
-			copy(phi.begin(), phi.end(), back_inserter(P));
+			P = phi;
+			vc.bestMembersInGeneration.push_back(P[0]);
+			//P.erase(P.begin(), P.end());
+			//copy(phi.begin(), phi.end(), back_inserter(P));
 		}
 		// if we are in the last iteration, copy members in (sorted) N into P
 		else {
@@ -137,6 +139,7 @@ Population runPPA(Parameters *ps)
 			for (auto n : N) {
 				P.push_back(get<0>(n));
 			}
+			vc.bestMembersInGeneration.push_back(P[0]);
 		}
 	}
 

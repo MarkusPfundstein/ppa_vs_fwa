@@ -269,7 +269,7 @@ Population selectSparksForNextGeneration(const Population& K, const Member& best
 	return newPopulation;
 }
 
-Population runFWA(Parameters *ps)
+Population runFWA(Parameters *ps, ValueCollector &vc)
 {
 	const FWA& fwa = castParameters<FWA>(ps);
 
@@ -279,13 +279,16 @@ Population runFWA(Parameters *ps)
 		// set of n fireworks at n locations
 		auto objectiveValues = evalObjectiveFunctionForPopulation(P, fwa.objectiveFunction);
 		if (g == fwa.maxGenerations - 1) {
+			// lower is better
 			stable_sort(objectiveValues.begin(), objectiveValues.end(), compareMemberWithValueLower);
-			//reverse(objectiveValues.begin(), objectiveValues.end());
 
 			P = Population();
 			for (const auto &l : objectiveValues) {
 				P.push_back(move(get<0>(l)));
 			}
+
+			vc.bestMembersInGeneration.push_back(P[0]);
+
 			return P;
 		}
 		else {
@@ -301,6 +304,8 @@ Population runFWA(Parameters *ps)
 
 			// select the best location and keep it for next explosion generation
 			auto bestLocation = get<0>(*min_element(objectiveValues.begin(), objectiveValues.end(), compareMemberWithValueLower));
+
+			vc.bestMembersInGeneration.push_back(bestLocation);
 
 			// randomly select (n - 1) locations from the two types of sparks and the current fireworks
 			Population allSparks(newSparks);
