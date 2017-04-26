@@ -99,27 +99,33 @@ int runExperiments(size_t nRuns, Parameters *ps, string writeValuesPath)
 	cout << "maxGenerations:\t\t " << ps->maxGenerations << endl;
 	cout << "dimensions:\t\t " << ps->coordinateBounds.size() << endl;
 	cout << "bounds[0]:\t\t (" << printBound(ps->coordinateBounds.front()) << ")" << endl;
+	cout << "initBounds[0]:\t\t (" << printBound(ps->initBounds.front()) << ")" << endl;
 	if (ps->knownOptimum != nullptr) {
 		cout << "knownOptimum:\t\t (" << printMember(*ps->knownOptimum) << ")" << endl;
 		cout << "globalMinimum:\t\t " << ps->objectiveFunction(*ps->knownOptimum) << endl;
 	}
 	cout << ps->printParameters() << endl;
 
-	vector<MemberWithValue> results;
-	results.reserve(nRuns);
-	
 	ofstream out;
 	if (writeValuesPath != "") {
 		out.open(writeValuesPath, ostream::out);
+		if (!out.is_open()) {
+			cerr << "error opening: " << writeValuesPath << endl;
+			return -1;
+		}
 		cout << "write intermediate values to: " << writeValuesPath << endl;
 		writeJsonStart(out);
 	}
 
 	cout << "start experiment, runs: " << nRuns << endl;
 
+	vector<MemberWithValue> results;
+	results.reserve(nRuns);
+
 	for (size_t i = 0; i < nRuns; ++i) {
 
 		ValueCollector collector;
+		collector.bestMembersInGeneration.reserve(ps->maxGenerations);
 		
 		double timeTakenMs;
 

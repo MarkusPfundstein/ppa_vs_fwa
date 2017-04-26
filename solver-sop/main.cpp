@@ -55,8 +55,12 @@ enum  optionIndex {
 	MAX_GENERATIONS,
 	UNI_MIN_BOUND,
 	UNI_MAX_BOUND,
+	INIT_MIN_BOUND,
+	INIT_MAX_BOUND,
 	KNOWN_OPTIMUM,
 	PPA_NMAX,
+	FWA_AMAX,
+	FWA_MAX_SPARKS,
 	WRITE_VALUES
 };
 
@@ -66,16 +70,26 @@ const option::Descriptor usage[] = {
 	{ HELP,    0,"", "help",    Arg::None,    "  \t--help  \tPrint usage and exit." },
 	{ WRITE_VALUES,    0, "",  "write-values",     Arg::Optional,     "  --write-values \tfile in which we write intermediate values" },
 
+	/* GENERAL */
 	{ ALGORITHM,       0, "a", "algorithm",        Arg::NonEmpty, "  -a <arg>, \t--algorithm=<arg>  \tAlgorithm to use." },
 	{ FUNCTION,        0, "f", "function",         Arg::NonEmpty, "  -f <arg>, \t--function=<arg>   \tSOP function to use." },
 	{ INITIAL_SIZE,    0, "n", "initial-size",     Arg::Numeric,  "  -n <arg>, \t--initial-size=<arg>  \tinitial size of population." },
 	{ DIMENSIONS,      0, "a", "dimensions",       Arg::Numeric,  "  -d <arg>, \t--dimensions=<arg>  \thow many dimensions. function must support it" },
 	{ NUMBER_RUNS,     0, "t", "number-runs",      Arg::Numeric,  "  -t <arg>, \t--number-runs=<arg>  \thow often do we want to run the experiment?" },
 	{ MAX_GENERATIONS, 0, "g", "max-generations",  Arg::Numeric,  "  -g <arg>, \t--max-generations=<arg>  \thow often do we want to reproduce?" },
-	{ UNI_MIN_BOUND,   0, "u", "min-bound",        Arg::Numeric,  "  -u <arg>, \t--uni-min-bound=<arg>  \tmin bound for uniform coordinate system" },
-	{ UNI_MAX_BOUND,   0, "v", "max-bound",        Arg::Numeric,  "  -v <arg>, \t--uni-max-bound=<arg>  \tmax bound for uniform coordinate system" },
+	{ UNI_MIN_BOUND,   0, "u", "min-bound",        Arg::Numeric,  "  -u <arg>, \t--min-bound=<arg>  \tound for uniform coordinate system" },
+	{ UNI_MAX_BOUND,   0, "v", "max-bound",        Arg::Numeric,  "  -v <arg>, \t--max-bound=<arg>  \tbound for uniform coordinate system" },
 	{ KNOWN_OPTIMUM,   0, "o", "known-optimum",    Arg::Optional, "  -o x1,x2,...\t--known-optimum=x1,x2,..." },
+	{ INIT_MIN_BOUND,  0, "",  "init-min-bound",   Arg::Numeric,  " --init-min-bound=<arg>" },
+	{ INIT_MAX_BOUND,  0, "",  "init-max-bound",   Arg::Numeric,  " --init-max-bound=<arg>" },
+
+	/* PPA SPECIFIC */
 	{ PPA_NMAX,        0, "",  "ppa-nmax",         Arg::Numeric,  " --ppa-nmax=<arg>\tmax runners per plant" },
+	
+	/* FWA SPECIFIC */
+	{ FWA_AMAX,        0, "",  "fwa-amax",         Arg::Numeric,  " --fwa-amax=<arg>\tmax amplitude per explosion" },
+	{ FWA_MAX_SPARKS,  0, "",  "fwa-max-sparks",   Arg::Numeric,  " --fwa-max-sparks=<arg>\tmax sparks per firework" },
+
 
 	{ UNKNOWN, 0,"", "",        Arg::None, "no idea what you mean" },
 	{ 0, 0, 0, 0, 0, 0 } 
@@ -90,7 +104,11 @@ bool getParameters(option::Option *options, Parameters **p)
 	int maxGenerations = getNumericArg(options, MAX_GENERATIONS, 30);
 	int minBound = getNumericArg(options, UNI_MIN_BOUND, -1);
 	int maxBound = getNumericArg(options, UNI_MAX_BOUND, -1);
+	int initMinBound = getNumericArg(options, INIT_MIN_BOUND, minBound);
+	int initMaxBound = getNumericArg(options, INIT_MAX_BOUND, maxBound);
 	int ppaNmax = getNumericArg(options, PPA_NMAX, 5);
+	int fwaAmax = getNumericArg(options, FWA_AMAX, 40);
+	int fwaMaxSparks = getNumericArg(options, FWA_MAX_SPARKS, 50);
 
 	string knownOptimumString = getStringArg(options, KNOWN_OPTIMUM);
 
@@ -112,6 +130,8 @@ bool getParameters(option::Option *options, Parameters **p)
 	}
 	else if (algorithm == "fwa") {
 		auto *fwa = new FWA();
+		fwa->Amax = fwaAmax;
+		fwa->maxSparks = fwaMaxSparks;
 		*p = static_cast<Parameters*>(fwa);
 	}
 	else {
@@ -146,7 +166,9 @@ bool getParameters(option::Option *options, Parameters **p)
 	(*p)->objectiveFunctionName = objectiveFunction;
 	(*p)->initialSize = initialSize;
 	(*p)->coordinateBounds = createUniformCoordinateBounds(dimensions, minBound, maxBound);
+	(*p)->initBounds = createUniformCoordinateBounds(dimensions, initMinBound, initMaxBound);
 	(*p)->maxGenerations = maxGenerations;
+	if (initMinBound)
 
 	return true;
 

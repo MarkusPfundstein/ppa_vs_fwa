@@ -16,6 +16,9 @@ struct Parameters {
 	// set bounds (min, max) for coordinate system. determines dimension of problem.
 	vector<CoordBound> coordinateBounds;
 
+	// bounds for initialization
+	vector<CoordBound> initBounds;
+
 	// name of algorithm
 	string algorithm;
 

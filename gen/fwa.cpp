@@ -190,75 +190,80 @@ const Population calculateNewSparks(
 	return newSparks;
 }
 
-double computeRxi(const Member &xi, const Population& K, const Member& bestLocation, function<double(const Member&, const Member&)> distanceFunc)
+double computeRxi(const Member &xi, const Population& K, function<double(const Member&, const Member&)> distanceFunc)
 {
 	double currentSum = 0.0;
 
 	// calculate sum of distance for current spark
 	for (const auto &xj : K) {
-		if (compareMemberEquals(xj, bestLocation)) {
-			continue;
-		}
+		//if (compareMemberEquals(xj, bestLocation)) {
+		//	continue;
+		//}
 		currentSum += distanceFunc(xi, xj);
 	}
 	return currentSum;
 }
 
-Population selectSparksForNextGeneration(const Population& K, const Member& bestLocation, size_t n, function<double(const Member&, const Member&)> distanceFunc)
+Population selectSparksForNextGeneration(const Population& K, size_t n, function<double(const Member&, const Member&)> distanceFunc)
 {
-	vector<MemberWithValue> vecs;
-	vecs.reserve(static_cast<size_t>(pow(K.size(), 2)));
+	vector<MemberWithValue> probs;
+	probs.reserve(static_cast<size_t>(pow(K.size(), 2)));
 	// for every spark, calculate distance to every other spark
 	double R_total = 0.0;
 	for (const auto &xi : K) {
-		if (compareMemberEquals(xi, bestLocation)) {
-			continue;
-		}
-
-		R_total += computeRxi(xi, K, bestLocation, distanceFunc);
+		R_total += computeRxi(xi, K, distanceFunc);
 	}
 
 	for (const auto &xi : K) {
-		if (compareMemberEquals(xi, bestLocation)) {
-			continue;
-		}
-
-		const double R_xi = computeRxi(xi, K, bestLocation, distanceFunc);
+		const double R_xi = computeRxi(xi, K, distanceFunc);
 
 		const double P_xi = R_xi / R_total;
 
-		vecs.push_back(MemberWithValue(Member(xi), P_xi));
+		probs.push_back(MemberWithValue(xi, P_xi));
 	}
 
 	// sort
 	stable_sort(
-		vecs.begin(),
-		vecs.end(),
+		probs.begin(),
+		probs.end(),
 		compareMemberWithValueLower
 	);
-	
-	// vecs.erase(unique(vecs.begin(), vecs.end(), compareMemberWithValueSameValue), vecs.end());
-	
+
+	// build density function
+	double runner = 0.0;
+	vector<MemberWithValue> pDens;
+	pDens.reserve(probs.size());
+	for (const auto &v : probs) {
+		const auto& member = get<0>(v);
+		const double value = get<1>(v);
+
+		runner += value;
+
+		pDens.push_back({ member, runner });
+	}
+
 	// pick (n - 1) values
 	Population newPopulation;
 	newPopulation.reserve(n - 1);
 	while (n-- > 1) {
 		
 		const double r = fRand(0.0, 1.0);
-		//cout << "r: " << r << endl;
 
-		double s = 0.0;
-		for (size_t i = 0; i < vecs.size(); ++i) {
-			if (i == vecs.size() - 1) {
-				newPopulation.push_back(get<0>(vecs[i]));
+		// roulette wheel
+//		double s = 0.0;
+		for (size_t i = 0; i < pDens.size(); ++i) {
+			if (i == pDens.size() - 1) {
+				newPopulation.push_back(get<0>(pDens[i]));
 			}
 			else {
-				const auto& xi = vecs[i];
-				const auto& xi2 = vecs[i + 1];
+				const auto& xi = pDens[i];
+				//const auto& xi2 = vecs[i + 1];
 
-				s += get<1>(xi);
-				if (s <= r && r < s + get<1>(xi2)) {
-					const auto& n = get<0>(xi2);
+				double s = get<1>(xi);
+				
+				if (r <= s) {
+				//if (s <= r && r < s + get<1>(xi2)) {
+					const auto& n = get<0>(xi);
 					newPopulation.push_back(n);
 					break;
 				}
@@ -273,7 +278,7 @@ Population runFWA(Parameters *ps, ValueCollector &vc)
 {
 	const FWA& fwa = castParameters<FWA>(ps);
 
-	auto P = createRandomPopulation(fwa.initialSize, fwa.coordinateBounds);
+	auto P = createRandomPopulation(fwa.initialSize, fwa.initBounds);
 
 	for (size_t g = 0; g < fwa.maxGenerations; ++g) {
 		// set of n fireworks at n locations
@@ -313,6 +318,7 @@ Population runFWA(Parameters *ps, ValueCollector &vc)
 			copy(P.begin(), P.end(), back_inserter(allSparks));
 
 			// remove duplicates (urks) and bestLocation
+
 			Population setSparks;
 			setSparks.reserve(allSparks.size());
 			for (const auto &s1 : allSparks) {
@@ -330,7 +336,8 @@ Population runFWA(Parameters *ps, ValueCollector &vc)
 				}
 			}
 
-			P = selectSparksForNextGeneration(setSparks, bestLocation, fwa.initialSize, fwa.distanceFunction);
+			// initial size
+			P = selectSparksForNextGeneration(setSparks, fwa.initialSize, fwa.distanceFunction);
 			P.push_back(bestLocation);
 		}
 	}

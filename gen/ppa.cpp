@@ -88,7 +88,7 @@ Population runPPA(Parameters *ps, ValueCollector &vc)
 {
 	const PPA &params = castParameters<PPA>(ps);
 
-	auto P = createRandomPopulation(params.initialSize, params.coordinateBounds);
+	auto P = createRandomPopulation(params.initialSize, params.initBounds);
 
 	for (size_t g = 0; g < params.maxGenerations; ++g) {
 		// compute N_i = f(p_i) forall p in P
