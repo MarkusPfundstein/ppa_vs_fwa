@@ -53,6 +53,7 @@ enum  optionIndex {
 	DIMENSIONS,
 	NUMBER_RUNS,
 	MAX_GENERATIONS,
+	MAX_FEVALS,
 	UNI_MIN_BOUND,
 	UNI_MAX_BOUND,
 	INIT_MIN_BOUND,
@@ -77,6 +78,7 @@ const option::Descriptor usage[] = {
 	{ DIMENSIONS,      0, "a", "dimensions",       Arg::Numeric,  "  -d <arg>, \t--dimensions=<arg>  \thow many dimensions. function must support it" },
 	{ NUMBER_RUNS,     0, "t", "number-runs",      Arg::Numeric,  "  -t <arg>, \t--number-runs=<arg>  \thow often do we want to run the experiment?" },
 	{ MAX_GENERATIONS, 0, "g", "max-generations",  Arg::Numeric,  "  -g <arg>, \t--max-generations=<arg>  \thow often do we want to reproduce?" },
+	{ MAX_FEVALS,      0,   "", "max-fevals",      Arg::Numeric,  "  --max-fevals" },
 	{ UNI_MIN_BOUND,   0, "u", "min-bound",        Arg::Numeric,  "  -u <arg>, \t--min-bound=<arg>  \tound for uniform coordinate system" },
 	{ UNI_MAX_BOUND,   0, "v", "max-bound",        Arg::Numeric,  "  -v <arg>, \t--max-bound=<arg>  \tbound for uniform coordinate system" },
 	{ KNOWN_OPTIMUM,   0, "o", "known-optimum",    Arg::Optional, "  -o x1,x2,...\t--known-optimum=x1,x2,..." },
@@ -102,6 +104,7 @@ bool getParameters(option::Option *options, Parameters **p)
 	int dimensions = getNumericArg(options, DIMENSIONS, -1);
 	int initialSize = getNumericArg(options, INITIAL_SIZE, 30);
 	int maxGenerations = getNumericArg(options, MAX_GENERATIONS, 30);
+	int maxFunctionEvals = getNumericArg(options, MAX_FEVALS, 10000 * dimensions);
 	int minBound = getNumericArg(options, UNI_MIN_BOUND, -1);
 	int maxBound = getNumericArg(options, UNI_MAX_BOUND, -1);
 	int initMinBound = getNumericArg(options, INIT_MIN_BOUND, minBound);
@@ -109,6 +112,7 @@ bool getParameters(option::Option *options, Parameters **p)
 	int ppaNmax = getNumericArg(options, PPA_NMAX, 5);
 	int fwaAmax = getNumericArg(options, FWA_AMAX, 40);
 	int fwaMaxSparks = getNumericArg(options, FWA_MAX_SPARKS, 50);
+	
 
 	string knownOptimumString = getStringArg(options, KNOWN_OPTIMUM);
 
@@ -168,6 +172,7 @@ bool getParameters(option::Option *options, Parameters **p)
 	(*p)->coordinateBounds = createUniformCoordinateBounds(dimensions, minBound, maxBound);
 	(*p)->initBounds = createUniformCoordinateBounds(dimensions, initMinBound, initMaxBound);
 	(*p)->maxGenerations = maxGenerations;
+	(*p)->maxFunctionEvaluations = maxFunctionEvals;
 	if (initMinBound)
 
 	return true;
@@ -179,6 +184,8 @@ errorAndDeleteP:
 
 int main(int argc, char* argv[])
 {
+	cout.precision(9);
+
 	argc -= (argc > 0); argv += (argc > 0); // skip program name argv[0] if present
 	option::Stats stats(usage, argc, argv);
 	option::Option* options = new option::Option[stats.options_max];

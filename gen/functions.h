@@ -8,7 +8,8 @@
 /* objective function */
 double rosenbrock(const Member& member);
 double griewank(const Member& member);
-double schwefel(const Member& member);
+double schwefel1_2(const Member& member);
+double schwefel7(const Member& member);
 double easom(const Member& member);
 double ackleys_path(const Member& member);
 

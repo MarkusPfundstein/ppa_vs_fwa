@@ -17,10 +17,11 @@ vector<MemberWithValue> calculateFitnessForPopulation(
 	const Population& population,
 	function<double(const Member&)> objF,
 	function<double(double, double, double)> f,
-	function<double(double)> normF)
+	function<double(double)> normF,
+	int *evals)
 {
 	// O(n)
-	auto objectiveValues = evalObjectiveFunctionForPopulation(population, objF);
+	auto objectiveValues = evalObjectiveFunctionForPopulation(population, objF, evals);
 	//for (auto f : objectiveValues) cout << get<1>(f) << endl;
 
 	auto minMaxMembers = minmax_element(objectiveValues.begin(), objectiveValues.end(), compareMemberWithValueLower);
@@ -90,13 +91,16 @@ Population runPPA(Parameters *ps, ValueCollector &vc)
 
 	auto P = createRandomPopulation(params.initialSize, params.initBounds);
 
-	for (size_t g = 0; g < params.maxGenerations; ++g) {
+	int evals = 0;
+	size_t g = 0;
+	for (; g < params.maxGenerations && (size_t)evals < params.maxFunctionEvaluations; ++g) {
 		// compute N_i = f(p_i) forall p in P
 		auto N = calculateFitnessForPopulation(
 			P,
 			params.objectiveFunction,
 			params.fitnessFunction,
-			normalizeTan
+			normalizeTan, 
+			&evals
 		);
 
 		// sort P in descending order of N
@@ -142,6 +146,9 @@ Population runPPA(Parameters *ps, ValueCollector &vc)
 			vc.bestMembersInGeneration.push_back(P[0]);
 		}
 	}
+
+	vc.numberFunctionEvaluations = evals;
+	vc.numberGenerations = g;
 
 	return P;
 }

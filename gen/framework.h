@@ -10,6 +10,9 @@
 
 struct ValueCollector {
 	vector<Member> bestMembersInGeneration;
+
+	double numberFunctionEvaluations = 0;
+	double numberGenerations = 0;
 };
 
 struct Parameters {
@@ -27,6 +30,9 @@ struct Parameters {
 
 	// how many generations do we want to go on before we stop?
 	size_t maxGenerations;
+
+	// how many function evaluations?
+	size_t maxFunctionEvaluations;
 
 	// name of the objective function
 	string objectiveFunctionName;

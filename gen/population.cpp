@@ -33,7 +33,7 @@ bool compareMemberEquals(const Member & m1, const Member& m2)
 	return true;
 }
 
-vector<MemberWithValue> evalObjectiveFunctionForPopulation(const Population &population, function<double(const Member&)> f)
+vector<MemberWithValue> evalObjectiveFunctionForPopulation(const Population &population, function<double(const Member&)> f, int *evals)
 {
 	vector<MemberWithValue> objectiveValues;
 	objectiveValues.reserve(population.size());
@@ -44,6 +44,8 @@ vector<MemberWithValue> evalObjectiveFunctionForPopulation(const Population &pop
 		back_inserter(objectiveValues),
 		[f](auto &m) { return MemberWithValue(Member(m), f(m)); }
 	);
+
+	*evals += population.size();
 
 	return objectiveValues;
 }

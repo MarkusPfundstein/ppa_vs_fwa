@@ -26,12 +26,38 @@ T prod(const vector<T> &xs, function<T(T)> f)
 
 double rosenbrock(const Member& member) {
 	double sum = 0.0;
+
+	// shift value -> new origin (o, o, o)
+	// unshifted o = 1
+	const double o = 1;
+
+	const size_t n = member.size();
+	for (size_t i = 0; i < (n - 1); ++i) {
+		const double x_1 = member[i + 1] - o + 1;
+		const double x = member[i] - o + 1;
+
+		const double inner1 = x_1 - pow(x, 2);
+		const double part1 = 100.0 * pow(inner1, 2);
+		const double part2 = pow(x - 1.0, 2);
+
+		sum += (part1 + part2);
+	}
+
+	return sum;
+}
+
+
+double rosenbrock2(const Member& member) {
+	double sum = 0.0;
 	
 	const size_t n = member.size();
 	for (size_t i = 0; i < (n - 1); ++i) {
-		double inner1 = member[i + 1] - pow(member[i], 2);
-		double part1 = 100.0 * pow(inner1, 2);
-		double part2 = pow(member[i] - 1.0, 2);
+		const double x_1 = member[i + 1];
+		const double x = member[i];
+
+		const double inner1 = x_1 - pow(x, 2);
+		const double part1 = 100.0 * pow(inner1, 2);
+		const double part2 = pow(x - 1.0, 2);
 
 		sum += (part1 + part2);
 	}
@@ -54,7 +80,22 @@ double griewank(const Member& member) {
 	return S - prod + 1.0;
 }
 
-double schwefel(const Member& member)
+double schwefel1_2(const Member& x)
+{
+	double f = 0;
+	double a;
+	for (size_t i = 0; i < x.size(); i++)
+	{
+		a = 0.0;
+		for (size_t j = 0; j <= i; j++) {
+			a += x[j];
+		}
+		f += a * a;
+	}
+	return f;
+}
+
+double schwefel7(const Member& member)
 {
 	const double c = 418.98288727243369;
 

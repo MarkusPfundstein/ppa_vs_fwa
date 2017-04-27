@@ -3,6 +3,7 @@
 #include <tuple>
 #include <chrono>
 #include <fstream>
+#include <stdio.h>
 #include "framework.h"
 #include "ppa.h"
 #include "fwa.h"
@@ -15,7 +16,8 @@ map<string, function<Population(Parameters*, ValueCollector&)>> ALGO_MAP = {
 map <string, function<double(const Member&)>> OBJ_MAP = {
 	{ "rosenbrock", rosenbrock },
 	{ "griewank", griewank },
-	{ "schwefel", schwefel },
+	{ "schwefel1_2", schwefel1_2 },
+	{ "schwefel7", schwefel7 },
 	{ "easom", easom },
 	{ "ackleys_path", ackleys_path }
 };
@@ -89,6 +91,9 @@ void writeJsonOutput(const string& s, ostream &out, size_t run, size_t runMax)
 
 int runExperiments(size_t nRuns, Parameters *ps, string writeValuesPath)
 {
+	srand((unsigned int)time(NULL));
+
+
 	if (ps->objectiveFunctionName.size() > 0) {
 		ps->objectiveFunction = OBJ_MAP.at(ps->objectiveFunctionName);
 	}
@@ -97,6 +102,7 @@ int runExperiments(size_t nRuns, Parameters *ps, string writeValuesPath)
 	cout << "objectiveFunction:\t " << ps->objectiveFunctionName << endl;
 	cout << "initialSize:\t\t " << ps->initialSize << endl;
 	cout << "maxGenerations:\t\t " << ps->maxGenerations << endl;
+	cout << "maxFevals:\t\t " << ps->maxFunctionEvaluations << endl;
 	cout << "dimensions:\t\t " << ps->coordinateBounds.size() << endl;
 	cout << "bounds[0]:\t\t (" << printBound(ps->coordinateBounds.front()) << ")" << endl;
 	cout << "initBounds[0]:\t\t (" << printBound(ps->initBounds.front()) << ")" << endl;
@@ -122,6 +128,7 @@ int runExperiments(size_t nRuns, Parameters *ps, string writeValuesPath)
 	vector<MemberWithValue> results;
 	results.reserve(nRuns);
 
+	double errorSum = 0.0;
 	for (size_t i = 0; i < nRuns; ++i) {
 
 		ValueCollector collector;
@@ -140,9 +147,22 @@ int runExperiments(size_t nRuns, Parameters *ps, string writeValuesPath)
 		double objectiveValue = ps->objectiveFunction(bestSolution);
 
 		cout << "run: " << (i + 1) << ", objectiveValue=" << objectiveValue << ", ms: " << timeTakenMs <<  endl;
+		printf("#%d:\t%.9e\n", (i + 1), objectiveValue);
+		cout << "fevals:      " << collector.numberFunctionEvaluations << "/" << ps->maxFunctionEvaluations << endl;
+		cout << "generations: " << collector.numberGenerations << "/" << ps->maxGenerations << endl;
+
+		errorSum += objectiveValue;
 
 		results.push_back(MemberWithValue(bestSolution, objectiveValue));
 	}
+
+	double average = errorSum / nRuns;
+	double quadratic = 0.0;
+	for (size_t i = 0; i < nRuns; i++)
+	{
+		quadratic += (average - get<1>(results[i])) * (average - get<1>(results[i]));
+	}
+	double deviation = sqrt(quadratic / nRuns);
 
 	if (out.is_open()) {
 		writeJsonEnd(out);
@@ -154,6 +174,11 @@ int runExperiments(size_t nRuns, Parameters *ps, string writeValuesPath)
 	cout << "--------" << endl;
 	cout << "bestSolution: (" << printMember(get<0>(*bestSolution)) << ")" << endl;
 	cout << "bestObjective: " << get<1>(*bestSolution) << endl;
+	printf("Error is %.9e +/- %.9e\n", average, deviation);
+
+	//cout << "enter something to exit... " << endl;
+	//char temps[256];
+	//cin >> temp;
 
 	return 0;
 }
