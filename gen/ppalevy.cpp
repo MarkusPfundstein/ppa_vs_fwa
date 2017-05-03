@@ -67,57 +67,46 @@ static vector<MemberWithValue> calculateFitnessForPopulation2(
 	return fitnesses;
 }
 
-vector<Member> computeDisplacedSeeds2(size_t A, const vector<MemberWithValue> &N, const vector<CoordBound> &bounds)
+vector<Member> computeDisplacedSeeds2(size_t k, const vector<MemberWithValue> &N, const vector<CoordBound> &bounds)
 {
 	vector<Member> newRunners;
 
-	// get 5 best
-	for (size_t r = 0; r < N.size(); ++r) {
-		/*
-		if (A <= 0) {
-			break;
-		}
-		int k = rand() % A + 1;
-		A -= k;
-		double eatP = poisson(1.1, k);
-		if (eatP > 0.05) {
-		
-			for (int it = 0; it < k; ++it) {*/
-				Member member = get<0>(N[r]);
-				Member newMember;
-				newMember.reserve(member.size());
+	// k birds at this plant
+	for (size_t r = 0; r < k; ++r) {
 
-				for (size_t j = 0; j < member.size(); ++j) {
-					double xj = member[j];
+		Member member = get<0>(N[r]);
+		Member newMember;
+		newMember.reserve(member.size());
 
-					if (fRand(0, 1) < 0.8) {
+		for (size_t j = 0; j < member.size(); ++j) {
+			double xj = member[j];
 
-						auto boundj = bounds[j];
+			if (fRand(0, 1) < 0.8) {
 
-						double aj = get<0>(boundj);
-						double bj = get<1>(boundj);
+				auto boundj = bounds[j];
 
-						// update solution
-						// TO-DO: Validate mapping back to solution space. I think this here is a bit crude
-						double phi = fRand(aj, bj);
-						double l = Levy(xj, .1);
-						double newxj = xj + (bj - aj) * l;		// 40 = amplitude
-						if (newxj < aj) {
-							newxj = aj;
-						}
-						if (newxj > bj) {
-							newxj = bj;
-						}
-						//std::cout << "nx: " << xj << "       --> " << newxj << " ---- " << l << std::endl;
-						newMember.push_back(newxj);
-					}
-					else {
-						newMember.push_back(xj);
-					}
+				double aj = get<0>(boundj);
+				double bj = get<1>(boundj);
+
+				// update solution
+				// TO-DO: Validate mapping back to solution space. I think this here is a bit crude
+				double phi = fRand(aj, bj);
+				double l = Levy(xj, .1);
+				double newxj = xj + (bj - aj) * l;		// 40 = amplitude
+				if (newxj < aj) {
+					newxj = aj;
 				}
-				newRunners.push_back(newMember);
-			//}
-		//}
+				if (newxj > bj) {
+					newxj = bj;
+				}
+				//std::cout << "nx: " << xj << "       --> " << newxj << " ---- " << l << std::endl;
+				newMember.push_back(newxj);
+			}
+			else {
+				newMember.push_back(xj);
+			}
+		}
+		newRunners.push_back(newMember);
 	}
 
 	return newRunners;
@@ -178,6 +167,7 @@ Population runPPALevy(Parameters *ps, ValueCollector &vc)
 	int evals = 0;
 
 
+	const unsigned A = 10;  // number birds
 
 
 	size_t g = 0;
@@ -204,6 +194,7 @@ Population runPPALevy(Parameters *ps, ValueCollector &vc)
 
 		// if we are *not* in the last iteration, we create new runners
 		if (g < params.maxGenerations - 1) {
+			int Ac = A;
 			for (size_t i = 0; i < params.initialSize; ++i) {
 				// r_i <- set of runners where both the size of the set and the distance for each
 				//        runner (individually) is proportional to the fitness N_i
@@ -214,13 +205,26 @@ Population runPPALevy(Parameters *ps, ValueCollector &vc)
 				for (auto r : R) {
 					phi.push_back(r);
 				}
+
+				// compute displacedseeds
+				
+				// all birds are feed
+				if (Ac <= 0) {
+					continue;
+				}
+
+				int k = rand() % A + 1;
+				Ac -= k;
+				double eatP = poisson(1.1, k);
+				if (eatP > 0.05) {
+					auto R2 = computeDisplacedSeeds2(k, N, params.coordinateBounds);
+					for (auto r : R2) {
+						phi.push_back(r);
+					}
+				}
 			}
 
-			// compute displacedseeds
-			auto R2 = computeDisplacedSeeds2(10, N, params.coordinateBounds);
-			for (auto r : R2) {
-				phi.push_back(r);
-			}
+
 			P = phi;
 		}
 		// if we are in the last iteration, copy members in (sorted) N into P
