@@ -18,10 +18,6 @@ double Poisson(double Lambda, const unsigned NP)
 
 double sigmaU(double beta)
 {
-	if (!(1.0 <= beta && beta <= 2.0)) {
-		throw new runtime_error("beta out of range [1, 2]");
-	}
-
 	double numerator = tgamma(1.0 + beta) * sin(PI * beta * 0.5);
 	double denominator = tgamma(0.5 * (1.0 + beta)) * beta * pow(2, 0.5 * (beta - 1));
 
@@ -30,7 +26,7 @@ double sigmaU(double beta)
 
 double Levy(double val, double scale)
 {
-	double beta = 1.5;
+	const double beta = 1.5;
 
 	double sigma = sigmaU(beta);
 
@@ -71,49 +67,57 @@ static vector<MemberWithValue> calculateFitnessForPopulation2(
 	return fitnesses;
 }
 
-vector<Member> computeDisplacedSeeds2(double k, const MemberWithValue &m, const vector<CoordBound> &bounds)
+vector<Member> computeDisplacedSeeds2(size_t A, const vector<MemberWithValue> &N, const vector<CoordBound> &bounds)
 {
 	vector<Member> newRunners;
 
-	Member member = get<0>(m);
-	double ni = get<1>(m);
-
-	// n_r = number of runners to generate for solution i in current population
-	size_t nr = static_cast<size_t>(ceil(k * ni * fRand(0, 1)));
-
-	for (size_t r = 0; r < nr; ++r) {
-		Member newMember;
-		newMember.reserve(member.size());
-
-		for (size_t j = 0; j < member.size(); ++j) {
-			double xj = member[j];
-
-			if (fRand(0, 1) < 0.8) {
-
-				auto boundj = bounds[j];
-
-				double aj = get<0>(boundj);
-				double bj = get<1>(boundj);
-
-				// update solution
-				// TO-DO: Validate mapping back to solution space. I think this here is a bit crude
-				double phi = fRand(aj, bj);
-				double newxj = xj + Levy(xj - phi, 40);		// 40 = amplitude
-				if (newxj < aj) {
-					newxj = aj;
-				}
-				if (newxj > bj) {
-					newxj = bj;
-				}
-				newMember.push_back(newxj);
-			}
-			else {
-				newMember.push_back(xj);
-			}
-
-
+	// get 5 best
+	for (size_t r = 0; r < N.size(); ++r) {
+		/*
+		if (A <= 0) {
+			break;
 		}
-		newRunners.push_back(newMember);
+		int k = rand() % A + 1;
+		A -= k;
+		double eatP = poisson(1.1, k);
+		if (eatP > 0.05) {
+		
+			for (int it = 0; it < k; ++it) {*/
+				Member member = get<0>(N[r]);
+				Member newMember;
+				newMember.reserve(member.size());
+
+				for (size_t j = 0; j < member.size(); ++j) {
+					double xj = member[j];
+
+					if (fRand(0, 1) < 0.8) {
+
+						auto boundj = bounds[j];
+
+						double aj = get<0>(boundj);
+						double bj = get<1>(boundj);
+
+						// update solution
+						// TO-DO: Validate mapping back to solution space. I think this here is a bit crude
+						double phi = fRand(aj, bj);
+						double l = Levy(xj, .1);
+						double newxj = xj + (bj - aj) * l;		// 40 = amplitude
+						if (newxj < aj) {
+							newxj = aj;
+						}
+						if (newxj > bj) {
+							newxj = bj;
+						}
+						//std::cout << "nx: " << xj << "       --> " << newxj << " ---- " << l << std::endl;
+						newMember.push_back(newxj);
+					}
+					else {
+						newMember.push_back(xj);
+					}
+				}
+				newRunners.push_back(newMember);
+			//}
+		//}
 	}
 
 	return newRunners;
@@ -128,6 +132,9 @@ vector<Member> computeNewRunners2(double nMax, const MemberWithValue &m, const v
 
 	// n_r = number of runners to generate for solution i in current population
 	size_t nr = static_cast<size_t>(ceil(nMax * ni * fRand(0, 1)));
+	if (nr < 1) {
+		nr = 1;
+	}
 
 	for (size_t r = 0; r < nr; ++r) {
 		Member newMember;
@@ -146,15 +153,15 @@ vector<Member> computeNewRunners2(double nMax, const MemberWithValue &m, const v
 
 			// update solution
 			// TO-DO: Validate mapping back to solution space. I think this here is a bit crude
-			double newX = xj + (bj - aj) * drj;
-			if (newX < aj) {
-				newX = aj;
+			double newxj = xj + (bj - aj) * drj;
+			if (newxj < aj) {
+				newxj = aj;
 			}
-			if (newX > bj) {
-				newX = bj;
+			if (newxj > bj) {
+				newxj = bj;
 			}
 
-			newMember.push_back(newX);
+			newMember.push_back(newxj);
 		}
 		newRunners.push_back(newMember);
 	}
@@ -169,19 +176,17 @@ Population runPPALevy(Parameters *ps, ValueCollector &vc)
 	auto P = createRandomPopulation(params.initialSize, params.initBounds);
 
 	int evals = 0;
+
+
+
+
 	size_t g = 0;
 	for (; g < params.maxGenerations && (size_t)evals < params.maxFunctionEvaluations; ++g) {
-		// compute N_i = f(p_i) forall p in P
-		auto N = calculateFitnessForPopulation2(
-			P,
-			params.objectiveFunction,
-			params.fitnessFunction,
-			normalizeTan,
-			&evals
-		);
-
 		// sort P in descending order of N
 		// Note: Sorting is only possible in ascending direction. Hence we have to reverse afterwards
+
+		auto N = calculateFitnessForPopulation2(P, params.objectiveFunction, params.fitnessFunction, normalizeTan, &evals);
+
 		stable_sort(
 			N.begin(),
 			N.end(),
@@ -192,7 +197,6 @@ Population runPPALevy(Parameters *ps, ValueCollector &vc)
 		auto best = get<0>(N.front());
 
 		vc.bestMembersInGeneration.push_back(best);
-
 
 		// create new Population phi
 		Population phi;
@@ -210,19 +214,13 @@ Population runPPALevy(Parameters *ps, ValueCollector &vc)
 				for (auto r : R) {
 					phi.push_back(r);
 				}
-
-				
-				// compute birds arriving and doing a levy
-				unsigned k = iRand(1, 10);
-				//if (Poisson(1.1, k) > 0.05) {
-				auto R2 = computeDisplacedSeeds2(k, N[i], params.coordinateBounds);
-				for (auto r : R2) {
-					phi.push_back(r);
-				}
-				
 			}
 
-			// P <- phi
+			// compute displacedseeds
+			auto R2 = computeDisplacedSeeds2(10, N, params.coordinateBounds);
+			for (auto r : R2) {
+				phi.push_back(r);
+			}
 			P = phi;
 		}
 		// if we are in the last iteration, copy members in (sorted) N into P

@@ -29,31 +29,12 @@ double rosenbrock(const Member& member) {
 
 	// shift value -> new origin (o, o, o)
 	// unshifted o = 1
-	const double o = 1;
+	const double o = -15;
 
 	const size_t n = member.size();
 	for (size_t i = 0; i < (n - 1); ++i) {
 		const double x_1 = member[i + 1] - o + 1;
 		const double x = member[i] - o + 1;
-
-		const double inner1 = x_1 - pow(x, 2);
-		const double part1 = 100.0 * pow(inner1, 2);
-		const double part2 = pow(x - 1.0, 2);
-
-		sum += (part1 + part2);
-	}
-
-	return sum;
-}
-
-
-double rosenbrock2(const Member& member) {
-	double sum = 0.0;
-	
-	const size_t n = member.size();
-	for (size_t i = 0; i < (n - 1); ++i) {
-		const double x_1 = member[i + 1];
-		const double x = member[i];
 
 		const double inner1 = x_1 - pow(x, 2);
 		const double part1 = 100.0 * pow(inner1, 2);
@@ -148,4 +129,5 @@ double euclideanDistance(const Member& m1, const Member& m2)
 
 double normalizeTan(double f) {
 	return 0.5 * (tanh(4.0 * f - 2.0) + 1.0);
+	//return tanh(f - 0.5) + 0.5;
 }

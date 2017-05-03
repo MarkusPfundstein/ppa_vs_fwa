@@ -46,6 +46,9 @@ vector<Member> computeNewRunners(double nMax, const MemberWithValue &m, const ve
 
 	// n_r = number of runners to generate for solution i in current population
 	size_t nr = static_cast<size_t>(ceil(nMax * ni * fRand(0, 1)));
+	if (nr < 1) {
+		nr = 1;
+	}
 
 	for (size_t r = 0; r < nr; ++r) {
 		Member newMember;
@@ -90,16 +93,8 @@ Population runPPA(Parameters *ps, ValueCollector &vc)
 	size_t g = 0;
 	for (; g < params.maxGenerations && (size_t)evals < params.maxFunctionEvaluations; ++g) {
 		// compute N_i = f(p_i) forall p in P
-		auto N = calculateFitnessForPopulation(
-			P,
-			params.objectiveFunction,
-			params.fitnessFunction,
-			normalizeTan, 
-			&evals
-		);
+		auto N = calculateFitnessForPopulation(P, params.objectiveFunction, params.fitnessFunction, normalizeTan, &evals);
 
-		// sort P in descending order of N
-		// Note: Sorting is only possible in ascending direction. Hence we have to reverse afterwards
 		stable_sort(
 			N.begin(),
 			N.end(),
@@ -107,17 +102,20 @@ Population runPPA(Parameters *ps, ValueCollector &vc)
 		);
 		reverse(N.begin(), N.end());
 
-		vc.bestMembersInGeneration.push_back(get<0>(N[0]));
+		auto best = get<0>(N.front());
 
+		vc.bestMembersInGeneration.push_back(best);
 
 		// create new Population phi
 		Population phi;
+		phi.push_back(best);
 
 		// if we are *not* in the last iteration, we create new runners
 		if (g < params.maxGenerations - 1) {
 			for (size_t i = 0; i < params.initialSize; ++i) {
 				// r_i <- set of runners where both the size of the set and the distance for each
 				//        runner (individually) is proportional to the fitness N_i
+				phi.push_back(get<0>(N[i]));
 				auto R = computeNewRunners(params.nMax, N[i], params.coordinateBounds);
 
 				// phi = phi UNION r
