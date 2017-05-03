@@ -2,6 +2,8 @@
 
 const double PI = 3.141592653589793238462643383279502884;
 
+const double SHIFT = 25;
+
 template <typename RT, typename VT>
 RT foldLeft(const vector<VT> &xs, VT s, function<RT(RT, VT)> f)
 {
@@ -29,7 +31,7 @@ double rosenbrock(const Member& member) {
 
 	// shift value -> new origin (o, o, o)
 	// unshifted o = 1
-	const double o = -15;
+	const double o = SHIFT;
 
 	const size_t n = member.size();
 	for (size_t i = 0; i < (n - 1); ++i) {
@@ -100,8 +102,10 @@ double ackleys_path(const Member& member)
 	const double c = 2 * PI;
 	const double n = member.size();
 
-	const double s1 = sum<double>(member, [](auto x) { return pow(x, 2); });
-	const double s2 = sum<double>(member, [c](auto x) { return cos(c * x); });
+	const double o = SHIFT;
+
+	const double s1 = sum<double>(member, [o](auto x) { return pow(x + o, 2); });
+	const double s2 = sum<double>(member, [o, c](auto x) { return cos(c * (x + o)); });
 
 	const double e1 = exp(-b * sqrt(s1 / n));
 	const double e2 = exp(s2 / n);
