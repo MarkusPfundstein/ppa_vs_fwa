@@ -145,6 +145,8 @@
   <ItemGroup>
     <ClCompile Include="framework.cpp" />
     <ClCompile Include="functions.cpp" />
+    <ClCompile Include="ppa-sbppa.cpp" />
+    <ClCompile Include="ppalevy.cpp" />
     <ClCompile Include="rng.cpp" />
     <ClCompile Include="fwa.cpp" />
     <ClCompile Include="ppa.cpp" />
@@ -153,6 +155,7 @@
   <ItemGroup>
     <ClInclude Include="framework.h" />
     <ClInclude Include="functions.h" />
+    <ClInclude Include="ppa-sbppa.h" />
     <ClInclude Include="rng.h" />
     <ClInclude Include="fwa.h" />
     <ClInclude Include="population.h" />

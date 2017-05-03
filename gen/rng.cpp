@@ -52,6 +52,33 @@ vector<int> randomIndices(const size_t size)
 	return dimIndices;
 }
 #else
+double sampleGaussian(double mu, double sigma)
+{
+	double x1 = 0.0;
+	double x2, y;
+
+	//Warning without outlet
+	while (x1 == 0.0)
+	{
+		x1 = (double)rand() / RAND_MAX;
+	}
+
+	x2 = (double)rand() / RAND_MAX;
+
+	//double log (double); 以e为底的对数
+	y = sqrt(-2 * log(x1)) * cos(2 * PI * x2);
+	double temp = mu + y * sigma;
+
+	//_finite returns 0 if the argument is infinite or a NAN
+	if (!_finite(temp))
+	{
+		//printf("X1 means to zero in function randGaussian.\n");
+		//system("pause");
+		exit(0);
+	}
+	return mu + y * sigma;
+}
+
 double sampleGaussian_1_1()
 {
 	double mu = 1.0;
@@ -104,5 +131,18 @@ vector<int> randomIndices(const size_t size)
 
 	return dimIndices;
 }
+
+
+constexpr int factorial(int n)
+{
+	return n <= 1 ? 1 : (n * factorial(n - 1));
+}
+
+// stationary (homogeneous) Poisson point process when Lambda is fixed
+double poisson(double Lambda, unsigned k, double t)
+{
+	return (pow(Lambda * t, k) / factorial(k)) * exp(-Lambda * t);
+}
+
 
 #endif

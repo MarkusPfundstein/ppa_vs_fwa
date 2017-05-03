@@ -18,3 +18,7 @@ double minMaxFitness(double v, double min, double max);
 
 /* distance functions */
 double euclideanDistance(const Member&, const Member&);
+
+
+double normalizeTan(double f);
+

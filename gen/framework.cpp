@@ -7,19 +7,22 @@
 #include "framework.h"
 #include "ppa.h"
 #include "fwa.h"
+#include "ppa-sbppa.h"
 
 map<string, function<Population(Parameters*, ValueCollector&)>> ALGO_MAP = {
 	{ "ppa", runPPA },
-	{ "fwa", runFWA }
+	{ "fwa", runFWA },
+	{ "ppa-sbppa", runPPA_sbPPA },
+	{ "ppalevy", runPPALevy }
 };
 
 map <string, function<double(const Member&)>> OBJ_MAP = {
 	{ "rosenbrock", rosenbrock },
 	{ "griewank", griewank },
-	{ "schwefel1_2", schwefel1_2 },
+	{ "schwefel", schwefel1_2 },
 	{ "schwefel7", schwefel7 },
 	{ "easom", easom },
-	{ "ackleys_path", ackleys_path }
+	{ "ackley", ackleys_path }
 };
 
 Population run(Parameters *ps, ValueCollector &vc, double *timeTakenMs)

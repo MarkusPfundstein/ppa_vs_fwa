@@ -130,7 +130,16 @@ bool getParameters(option::Option *options, Parameters **p)
 		ppa->nMax = ppaNmax;
 
 		*p = static_cast<Parameters*>(ppa);
-		
+	}
+	else if (algorithm == "ppalevy") {
+		auto *params = new PPA();
+
+		*p = static_cast<Parameters*>(params);
+	}
+	else if (algorithm == "ppa-sbppa") {
+		auto *params = new PPA_sbPPA();
+
+		*p = static_cast<Parameters*>(params);
 	}
 	else if (algorithm == "fwa") {
 		auto *fwa = new FWA();
@@ -140,7 +149,7 @@ bool getParameters(option::Option *options, Parameters **p)
 	}
 	else {
 		//throw new exception("unknown algorithm");
-		cerr << "unknown algorithm: " << algorithm << endl;
+		cerr << "[cli.cpp] unknown algorithm: " << algorithm << endl;
 		return false;
 	}
 	// from here on we must always jump to errorAndDeleteP

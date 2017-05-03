@@ -144,3 +144,8 @@ double euclideanDistance(const Member& m1, const Member& m2)
 
 	return sqrt(sum);
 };
+
+
+double normalizeTan(double f) {
+	return 0.5 * (tanh(4.0 * f - 2.0) + 1.0);
+}

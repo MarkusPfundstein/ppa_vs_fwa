@@ -67,6 +67,29 @@ struct PPA : public Parameters {
 	PPA() : Parameters("ppa") {}
 };
 
+struct PPA_sbPPA : public Parameters {
+
+	size_t A = 10;			// number of agents
+	
+	double Lambda = 1.1;
+	double t = 1.0;
+
+	double poissonThreshold = 0.05;
+	double PR = 0.8;
+
+	string printParameters()
+	{
+		stringstream ss;
+		ss << "Lambda:\t\t\t " << Lambda << endl;
+		ss << "A:\t\t\t" << A << endl;
+		ss << "PR: \t\t\t" << PR << endl;
+		return ss.str();
+	}
+
+	PPA_sbPPA() : Parameters("ppa-sbppa") {}
+
+};
+
 struct FWA : public Parameters {
 	// maximum amplitude per explosion (area in which we generate new sparks)
 	double Amax = 40.0;

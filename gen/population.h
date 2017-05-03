@@ -26,7 +26,6 @@ bool compareMemberWithValueSameValue(const MemberWithValue& v, const MemberWithV
 bool compareMemberEquals(const Member & m1, const Member& m2);
 
 vector<MemberWithValue> evalObjectiveFunctionForPopulation(const Population &population, function<double(const Member&)> f, int *evals);
-
 Population createRandomPopulation(size_t np, const vector<CoordBound> &bounds);
 
 vector<CoordBound> createUniformCoordinateBounds(size_t n, COORDBOUND_TYPE min, COORDBOUND_TYPE max);

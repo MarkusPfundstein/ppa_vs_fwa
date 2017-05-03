@@ -36,6 +36,12 @@
     <ClCompile Include="functions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ppa-sbppa.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ppalevy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="population.h">
@@ -54,6 +60,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="functions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ppa-sbppa.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
