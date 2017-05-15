@@ -6,5 +6,4 @@
 Population runPPA(Parameters *params, ValueCollector &vc);
 Population runPPALevy(Parameters *params, ValueCollector &vc);
 
-
 #endif

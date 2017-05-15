@@ -22,7 +22,8 @@ map <string, function<double(const Member&)>> OBJ_MAP = {
 	{ "schwefel", schwefel1_2 },
 	{ "schwefel7", schwefel7 },
 	{ "easom", easom },
-	{ "ackley", ackleys_path }
+	{ "ackley", ackleys_path },
+	{ "michalewicz12", michalewicz12 }
 };
 
 Population run(Parameters *ps, ValueCollector &vc, double *timeTakenMs)
@@ -41,6 +42,7 @@ Population run(Parameters *ps, ValueCollector &vc, double *timeTakenMs)
 string writeCollectorData(const ValueCollector &collector, double timeTakenMs, const Parameters& ps)
 {
 	stringstream ss;
+	return "{}";
 
 	const size_t n = collector.bestMembersInGeneration.size() - 1;
 	ss << "{" << endl;
@@ -72,14 +74,43 @@ string writeCollectorData(const ValueCollector &collector, double timeTakenMs, c
 	return ss.str();
 }
 
-void writeJsonStart(ostream &out)
+void writeJsonStart(ostream &out, Parameters *ps)
 {
-	out << "[" << endl; 
+	out << "{" << endl;
+	out << "\t\"params\":{" << endl;
+
+	out << "\t\t\"algorithm\":\"" << ps->algorithm << "\"," << endl;
+	out << "\t\t\"objectiveFunction\":\"" << ps->objectiveFunctionName << "\"," << endl;
+	out << "\t\t\"initialSize\": " << ps->initialSize << "," << endl;
+	out << "\t\t\"maxGenerations\":" << ps->maxGenerations << "," << endl;
+	out << "\t\t\"maxFevals\":" << ps->maxFunctionEvaluations << "," << endl;
+	out << "\t\t\"dimensions\":" << ps->coordinateBounds.size() << "," << endl;
+	out << "\t\t\"bounds[0]\": [" << printBound(ps->coordinateBounds.front()) << "]" << "," << endl;
+	out << "\t\t\"initBounds[0]\": [" << printBound(ps->initBounds.front()) << "]";
+	if (ps->knownOptimum != nullptr) {
+		out << "," << endl;
+		out << "\t\t\"knownOptimum\": [" << printMember(*ps->knownOptimum) << "]" << "," << endl;
+		out << "\t\t\"globalMinimum\": " << ps->objectiveFunction(*ps->knownOptimum) << endl;
+	}
+	else {
+		out << endl;
+	}
+	out << "\t}," << endl;		// end params
+	out << "\t\"runs\" : [" << endl; 
 }
 
-void writeJsonEnd(ostream &out)
+void writeJsonEnd(ostream &out, double overallBestValue, Member bestMember, double mean, double sd)
 {
+	out << "\t]," << endl; // end "runs"
+	out << "\t\"stats\": {" << endl;
+	out << "\t\t\"mean\": " << mean << "," <<  endl;
+	out << "\t\t\"sd\": " << sd << "," << endl;
+	out << "\t\t\"best\": " << overallBestValue << "," << endl;
+	out << "\t\t\"bestMember\": [";
+	out << printMember(bestMember);
 	out << "]" << endl;
+	out << "\t}" << endl;  // end "stats
+	out << "}" << endl;
 }
 
 void writeJsonOutput(const string& s, ostream &out, size_t run, size_t runMax)
@@ -123,7 +154,7 @@ int runExperiments(size_t nRuns, Parameters *ps, string writeValuesPath)
 			return -1;
 		}
 		cout << "write intermediate values to: " << writeValuesPath << endl;
-		writeJsonStart(out);
+		writeJsonStart(out, ps);
 	}
 
 	cout << "start experiment, runs: " << nRuns << endl;
@@ -167,17 +198,19 @@ int runExperiments(size_t nRuns, Parameters *ps, string writeValuesPath)
 	}
 	double deviation = sqrt(quadratic / nRuns);
 
-	if (out.is_open()) {
-		writeJsonEnd(out);
-		out.close();
-	}
-
 	auto bestSolution = min_element(results.begin(), results.end(), compareMemberWithValueLower);
 
 	cout << "--------" << endl;
 	cout << "bestSolution: (" << printMember(get<0>(*bestSolution)) << ")" << endl;
 	cout << "bestObjective: " << get<1>(*bestSolution) << endl;
 	printf("Error is %.9e +/- %.9e\n", average, deviation);
+
+
+	if (out.is_open()) {
+		writeJsonEnd(out, get<1>(*bestSolution), get<0>(*bestSolution), average, deviation);
+		out.close();
+	}
+
 
 	//cout << "enter something to exit... " << endl;
 	//char temps[256];

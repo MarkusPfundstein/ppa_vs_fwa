@@ -12,6 +12,7 @@ double schwefel1_2(const Member& member);
 double schwefel7(const Member& member);
 double easom(const Member& member);
 double ackleys_path(const Member& member);
+double michalewicz12(const Member& x);
 
 /* fitness normalizers */
 double minMaxFitness(double v, double min, double max);

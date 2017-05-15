@@ -133,6 +133,13 @@ bool getParameters(option::Option *options, Parameters **p)
 	}
 	else if (algorithm == "ppalevy") {
 		auto *params = new PPA();
+		params->nMax = ppaNmax;
+
+		*p = static_cast<Parameters*>(params);
+	}
+	else if (algorithm == "ppalevy-birds") {
+		auto *params = new PPA();
+		params->nMax = ppaNmax;
 
 		*p = static_cast<Parameters*>(params);
 	}

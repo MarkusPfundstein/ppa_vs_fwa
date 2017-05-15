@@ -86,6 +86,7 @@ Member generateGaussianSpark(const Member& xi, const vector<CoordBound> &bounds)
 	return xj;
 }
 
+
 Population generateGaussianSparks(const Population& oldPop, int mMuts, const vector<CoordBound> &bounds)
 {
 	Population newSparks;

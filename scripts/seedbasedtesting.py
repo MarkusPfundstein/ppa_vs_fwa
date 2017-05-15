@@ -13,7 +13,7 @@ def eq4(A, l, u):
 
 def g(l, u):
     print("{}, {}".format(l, u))
-    return l < (u)
+    return l < u + 1
 
 ls = np.linspace(1.0, 1.5, 20)
 us = np.linspace(0.01, 1, 20)

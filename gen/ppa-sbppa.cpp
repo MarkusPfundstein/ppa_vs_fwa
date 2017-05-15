@@ -6,12 +6,46 @@
 #include "population.h"
 #include "rng.h"
 
+const double PI = 3.14159265358979323846;
 
+double P(double Lambda, const unsigned NP)
+{
+       // need to adjust by 1 to not consider 0 agents
+	int k = rand() % NP + 1;
+	return poisson(Lambda, k);
+}
+
+double sigmaU(double beta)
+{
+//	sigma = (gamma(1 + beta)*sin(pi*beta / 2) / (gamma((1 + beta) / 2)*beta * 2 ^ ((beta - 1) / 2))) ^ (1 / beta);
+
+
+	//double numerator = tgamma(1.0 + beta) * sin(PI * beta / 2.0);
+	//double denominator = tgamma((1.0 + beta) / 2.0) * beta * pow(2, (beta - 1) / 2.0);
+	double numerator = tgamma(1.0 + beta) * sin(PI * beta / 2.0);
+	double denominator = tgamma((1.0 + beta) / 2.0) * beta * pow(2, (beta - 1) / 2.0);
+	
+	return pow(numerator / denominator, 1.0 / beta);
+}
+
+double Levy(double beta = 1.5)
+{
+	double sigma = sigmaU(beta);
+	
+	// matlab
+	double u = sampleGaussian(0, 1) * sigma;
+	double v = sampleGaussian(0, 1);
+
+	// paper 
+	//double u = sampleGaussian(0, sigma * sigma);
+	//double v = sampleGaussian(0, 1);
+
+	double step = u / pow(abs(v), 1.0 / beta);
+	return step;
+}
 
 Population runPPA_sbPPA(Parameters *ps, ValueCollector &vc)
 {
-	throw new runtime_error("ppa-sbppa sucks");
-#if 0
 	const PPA_sbPPA &params = castParameters<PPA_sbPPA>(ps);
 	
 
@@ -32,39 +66,62 @@ Population runPPA_sbPPA(Parameters *ps, ValueCollector &vc)
 	}
 
 	size_t g;
+
+	vector<double> pDist;
+	pDist.reserve(NP);
+
+	for (size_t i = 0; i < NP; ++i) {
+		// Matlab: 	//0.11	0.19	0.220	0.183	0.122	0.0679659986039712	0.0323	0.013	0.0049	0.00166
+		// 3.3 with NP = 10 gives me same results as matlab code
+		auto d = poisson(3.3, i + 1);       
+		pDist.push_back(d);
+	}
+
 	for (g = 0; g < params.maxGenerations && (size_t)evals < params.maxFunctionEvaluations; ++g) {		
-
 		auto objectiveValues = evalObjectiveFunctionForPopulation(Pbest, params.objectiveFunction, &evals);
-		auto m = *max_element(objectiveValues.begin(), objectiveValues.end(), compareMemberWithValueLower);
-		std::cout << "best: " << get<1>(m) << std::endl;
 
+		/*
+		if (g % 1000 == 0) {
+
+			auto bestSolution = *min_element(objectiveValues.begin(), objectiveValues.end(), compareMemberWithValueLower);
+			std::cout << "best: " << get<1>(bestSolution) << std::endl;
+
+		}
+		*/
 		for (size_t i = 0; i < NP; ++i) {
 			// if Poiss(lambda)_i > 0.05)
-			if (P(params.Lambda, params.A) > params.poissonThreshold) {
+			//     p2 = poisspdf(p1,npop/3);  <- poisspdf(k, lamda)
+			auto &X = Pbest[i];
+			Member Xnew(X);
+			// EXPLORATION
+			if (pDist[i] > params.poissonThreshold) {
 				for (size_t j = 0; j < n; ++j) {
 					// do we update coordinate at j?
 					if (fRand(0, 1) < params.PR) {
 						
-						double xj = Pbest[i][j];
+						double xj = X[j];
 						auto boundj = params.coordinateBounds[j];
 
 						double aj = get<0>(boundj);
 						double bj = get<1>(boundj);
 
-						const double phi = fRand(aj, bj); // random variable within search space
-						double step = phi * L(xj - phi, n);
-						double newX = xj + step;
+		
+						//0.01*step*(pop(i,s)-((rand(1)*b(s))+a(s)));
+						double step = Levy();
+						double stepSize = 0.01 * step * (xj - ((fRand(0, 1) * bj + aj)));
+						double newX = xj + stepSize;
 						if (newX < aj) {
 							newX = aj;
 						}
 						if (newX > bj) {
 							newX = bj;
 						}
-						Pbest[i][j] = newX;
-						
+						Xnew[j] = newX;
 					}
 				}
 			}
+
+			// EXPLOITATION
 			else {
 				auto F = minmax_element(objectiveValues.begin(), objectiveValues.end(), compareMemberWithValueLower);
 
@@ -82,7 +139,7 @@ Population runPPA_sbPPA(Parameters *ps, ValueCollector &vc)
 					double drj = 2.0 * (1.0 - ni) * (fRand(0, 1) - 0.5);
 					// each drj will be in (-1, 1)
 
-					double xj = Pbest[i][j];
+					double xj = X[j];
 					auto boundj = params.coordinateBounds[j];
 
 					double aj = get<0>(boundj);
@@ -97,8 +154,14 @@ Population runPPA_sbPPA(Parameters *ps, ValueCollector &vc)
 					if (newX > bj) {
 						newX = bj;
 					}
-					Pbest[i][j] = newX;
+					Xnew[j] = newX;
 				}
+			}
+
+			double valCur = params.objectiveFunction(X);
+			double valNew = params.objectiveFunction(Xnew);
+			if (valNew < valCur) {
+				Pbest[i] = Xnew;
 			}
 		}
 		
@@ -108,6 +171,5 @@ Population runPPA_sbPPA(Parameters *ps, ValueCollector &vc)
 	vc.numberGenerations = g;
 
 	return Pbest;
-#endif
 }
 

@@ -51,12 +51,12 @@ double rosenbrock(const Member& member) {
 double griewank(const Member& member) {
 	// 1/4000 * SUM_i(x_i^2) - PROD_i(cos(x/sqrt(i)) + 1
 
-	const double S = sum<double>(member, [](auto x) { return (pow(x, 2) / 4000.0); });
+	const double S = sum<double>(member, [](auto x) { return (pow(x + SHIFT, 2) / 4000.0); });
 
 	int i = 1;
 	double prod = 1.0;
 	for (double xi : member) {
-		prod *= cos(xi / sqrt(i));
+		prod *= cos((xi + SHIFT) / sqrt(i));
 		++i;
 	}
 
@@ -71,7 +71,7 @@ double schwefel1_2(const Member& x)
 	{
 		a = 0.0;
 		for (size_t j = 0; j <= i; j++) {
-			a += x[j];
+			a += x[j] + SHIFT;
 		}
 		f += a * a;
 	}
@@ -82,15 +82,15 @@ double schwefel7(const Member& member)
 {
 	const double c = 418.98288727243369;
 
-	const double s = sum<double>(member, [](auto x) { return x * sin(sqrt(abs(x)));  });
+	const double s = sum<double>(member, [](auto x) { return (x + SHIFT) * sin(sqrt(abs(x + SHIFT)));  });
 
 	return c * member.size() - s;
 }
 
 double easom(const Member& member)
 {
-	const double x1 = member[0];
-	const double x2 = member[1];
+	const double x1 = member[0] + SHIFT;
+	const double x2 = member[1] + SHIFT;
 
 	return -cos(x1) * cos(x2) * exp(-(pow(x1 - PI, 2) + pow(x2 - PI, 2)));
 }
@@ -111,6 +111,18 @@ double ackleys_path(const Member& member)
 	const double e2 = exp(s2 / n);
 	
 	return -a * e1 - e2 + a + exp(1);
+}
+
+double michalewicz12(const Member& y)
+{
+	const double m = 10.0;
+	double s = 0.0;
+	for (int i = 0; i < y.size(); ++i) {
+		const double x = y[i] + SHIFT;
+		s += sin(x) * pow(sin(i * x * x / PI), 2.0 * m);
+	}
+
+	return -s;
 }
 
 /* others */
