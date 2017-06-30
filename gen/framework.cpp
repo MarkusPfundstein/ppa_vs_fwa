@@ -23,7 +23,13 @@ map <string, function<double(const Member&)>> OBJ_MAP = {
 	{ "schwefel7", schwefel7 },
 	{ "easom", easom },
 	{ "ackley", ackleys_path },
-	{ "michalewicz12", michalewicz12 }
+	{ "michalewicz12", michalewicz12 },
+	{ "sphere", sphere },
+	{ "rastrigrin", rastrigrin },
+	{ "ellipse", ellipse },
+	{ "cigar", cigar },
+	{ "tablet", tablet },
+	{ "schwefelFWA", schwefelFWA }
 };
 
 Population run(Parameters *ps, ValueCollector &vc, double *timeTakenMs)
@@ -84,6 +90,7 @@ void writeJsonStart(ostream &out, Parameters *ps)
 	out << "\t\t\"initialSize\": " << ps->initialSize << "," << endl;
 	out << "\t\t\"maxGenerations\":" << ps->maxGenerations << "," << endl;
 	out << "\t\t\"maxFevals\":" << ps->maxFunctionEvaluations << "," << endl;
+	out << "\t\t\"shift\":" << ps->shiftValue << "," << endl;
 	out << "\t\t\"dimensions\":" << ps->coordinateBounds.size() << "," << endl;
 	out << "\t\t\"bounds[0]\": [" << printBound(ps->coordinateBounds.front()) << "]" << "," << endl;
 	out << "\t\t\"initBounds[0]\": [" << printBound(ps->initBounds.front()) << "]";
@@ -137,6 +144,7 @@ int runExperiments(size_t nRuns, Parameters *ps, string writeValuesPath)
 	cout << "initialSize:\t\t " << ps->initialSize << endl;
 	cout << "maxGenerations:\t\t " << ps->maxGenerations << endl;
 	cout << "maxFevals:\t\t " << ps->maxFunctionEvaluations << endl;
+	cout << "shiftValue:\t\t " << ps->shiftValue << endl;
 	cout << "dimensions:\t\t " << ps->coordinateBounds.size() << endl;
 	cout << "bounds[0]:\t\t (" << printBound(ps->coordinateBounds.front()) << ")" << endl;
 	cout << "initBounds[0]:\t\t (" << printBound(ps->initBounds.front()) << ")" << endl;
@@ -156,6 +164,9 @@ int runExperiments(size_t nRuns, Parameters *ps, string writeValuesPath)
 		cout << "write intermediate values to: " << writeValuesPath << endl;
 		writeJsonStart(out, ps);
 	}
+
+	setShift(ps->shiftValue);
+	cout << "getShift: " << getShift() << endl;
 
 	cout << "start experiment, runs: " << nRuns << endl;
 

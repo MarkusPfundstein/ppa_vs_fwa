@@ -40,6 +40,10 @@ struct Parameters {
 	// the objective function we want to evaluate
 	function<double(const Member&)> objectiveFunction;
 
+	// shift value
+	double shiftValue = 0.0;
+
+
 	// optional: Member of population that is known to be optimum. 
 	// if set we can control to stop when we are in certain area of optimum.
 	Member *knownOptimum = nullptr;

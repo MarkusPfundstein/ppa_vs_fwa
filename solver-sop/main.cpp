@@ -62,7 +62,9 @@ enum  optionIndex {
 	PPA_NMAX,
 	FWA_AMAX,
 	FWA_MAX_SPARKS,
-	WRITE_VALUES
+	WRITE_VALUES,
+
+	SHIFT
 };
 
 const option::Descriptor usage[] = {
@@ -92,6 +94,7 @@ const option::Descriptor usage[] = {
 	{ FWA_AMAX,        0, "",  "fwa-amax",         Arg::Numeric,  " --fwa-amax=<arg>\tmax amplitude per explosion" },
 	{ FWA_MAX_SPARKS,  0, "",  "fwa-max-sparks",   Arg::Numeric,  " --fwa-max-sparks=<arg>\tmax sparks per firework" },
 
+	{ SHIFT,  0, "",   "origin-shift",   Arg::Numeric,  " --origin-shift=<arg>\twanna shift the origin? put a number here" },
 
 	{ UNKNOWN, 0,"", "",        Arg::None, "no idea what you mean" },
 	{ 0, 0, 0, 0, 0, 0 } 
@@ -112,7 +115,7 @@ bool getParameters(option::Option *options, Parameters **p)
 	int ppaNmax = getNumericArg(options, PPA_NMAX, 5);
 	int fwaAmax = getNumericArg(options, FWA_AMAX, 40);
 	int fwaMaxSparks = getNumericArg(options, FWA_MAX_SPARKS, 50);
-	
+	int shift = getNumericArg(options, SHIFT, 0);	
 
 	string knownOptimumString = getStringArg(options, KNOWN_OPTIMUM);
 
@@ -189,8 +192,8 @@ bool getParameters(option::Option *options, Parameters **p)
 	(*p)->initBounds = createUniformCoordinateBounds(dimensions, initMinBound, initMaxBound);
 	(*p)->maxGenerations = maxGenerations;
 	(*p)->maxFunctionEvaluations = maxFunctionEvals;
-	if (initMinBound)
-
+	(*p)->shiftValue = shift;
+	
 	return true;
 
 errorAndDeleteP: 
